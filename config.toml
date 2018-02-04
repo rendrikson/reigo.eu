@@ -6,8 +6,8 @@ canonifyurls = true
 languagecode = "en"
 theme = "hugo-tanka"
 
-googleAnalytics = ""
-disqusShortname = ""
+googleAnalytics = "UA-113538088-1"
+disqusShortname = "reigo"
 disable_mathjax = false
 
 pygmentsstyle      = "vs"
@@ -30,4 +30,3 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
     name = "Twitter"
     url = "https://twitter.com/ReigoHendrikson"
     weight = 3
-

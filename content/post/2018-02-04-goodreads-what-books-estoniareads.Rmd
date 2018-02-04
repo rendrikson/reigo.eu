@@ -9,9 +9,9 @@ tags:
 slug: goodreads-what-books-estoniareads
 ---
 
-[Estonian National Broadcasting Agency](https://news.err.ee/) run a wonderful campaign called "Eesti loeb" (Estonia reads), where people were asked to post a picture of themselves with a book they are reading (or have read) and find inspiring. Photos of [readers with their favourite books](https://kultuur.err.ee/677126/fotod-lugejad-koos-oma-lemmikraamatutega) was published afterwards. 
+[Estonian National Broadcasting Agency](https://news.err.ee/) run a wonderful campaign called "Eesti loeb" (Estonia reads), where people were asked to post a picture of themselves with a book they are reading (or have read) and find inspiring. Photos of [readers with their favourite books](https://kultuur.err.ee/677126/fotod-lugejad-koos-oma-lemmikraamatutega) were published afterwards. 
 
-But what books are the most popular ones among Estonians? We are going to answer this question (inspired by the campaign) by analyzing books read by people in [Eesti Estonia](https://www.goodreads.com/group/show/45927-eesti-estonia) group in goodreads. [R](https://en.wikipedia.org/wiki/R_(programming_language)) will be used to get and analyze data.
+But which books are the most popular ones among Estonians? We are going to answer this question (inspired by the campaign) by analyzing books read by people in [Eesti Estonia](https://www.goodreads.com/group/show/45927-eesti-estonia) group in goodreads. [R](https://en.wikipedia.org/wiki/R_(programming_language)) will be used to get and analyze data.
 
 If you are not interested in R stuff, then feel free to jump to [results](#results).
 
@@ -87,7 +87,7 @@ shelf_to_df <- function(shelf) {
 
 We can look up "Eesti Estonia" group ID from its [URL](https://www.goodreads.com/group/show/45927-eesti-estonia), which is `45927`. In the time of writing this post there was 23 pages of members in the group, totalling little less than `r 23*30` members. 
 
-Now we can get all group members ID's and use these ID's to programmatically find and download users shelves. We use `purrr::map_df` for getting and storing members ID's and shelves. Since not all members allow accessing their data and some members have not listed any books in their `read` shelves, we use `tryCatch()` to avoid our loop breaking down.  We save shelves one by one to get the number of members who have read at last 1 book. We use this number as an effective group size, which comes handy when evaluating percentage of members who have read a certain book.[^2] Also, notice that the code below downloads first 1000 books (we download first 5 pages, each max 200 entries) users has in her `read` shelf.[^4] 
+Now we can get all group members ID's and use these ID's to programmatically find and download users shelves. We use `purrr::map_df` for getting and storing members ID's and shelves. Since not all members allow accessing their data and some members have not listed any books in their `read` shelves, we use `tryCatch()` to avoid our loop breaking down.  We save shelves one by one to get the number of members who have read at least 1 book. We use this number as an effective group size, which comes handy when evaluating percentage of members who have read a certain book.[^2] Also, notice that the code below downloads first 1000 books (we download first 5 pages, each max 200 entries) users have in their `read` shelves.[^4] 
 
 ```{r members_and_shelves, eval=FALSE}
 members <- map_df(1:23, function(p) {
@@ -164,6 +164,6 @@ My initial guess was that books by Estonian authors are dominating the list.[^3]
 
 
 [^1]: Half the credit for functions seen below goes to Max Humber's [blog post](http://maxhumber.com/goodreads-API-r) about how to use goodreads API in R.  
-[^2]: Real percentages may obviously differ, but for our purposes I find it good enough approximation. If your your `read` shelf is empty, then you are probably not active in goodreads.
+[^2]: Real percentages may obviously differ, but for our purposes I find it good enough approximation. If your `read` shelf is empty, then you are probably not active in goodreads.
 [^3]: When considering Harry Potter series as one book, the Estonian/other ratio in TOP15 will remain same. 
-[^4]: There was 8 members having more than 1000 books in their `read` shelf, which means our book stats can off by 8.
+[^4]: There are 8 members having more than 1000 books in their `read` shelf, which means our book stats can be off by 8.
