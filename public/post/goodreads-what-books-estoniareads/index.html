@@ -144,32 +144,31 @@ saveRDS(shelves, &quot;shelves.rds&quot;)</code></pre>
 <div id="results" class="section level1">
 <h1>Results</h1>
 <p>Having this data we can easily find out which are the most popular books among the group members:</p>
-<pre class="r"><code>df &lt;- shelves %&gt;%
-  count(title) %&gt;%
-  arrange(-n) %&gt;%
-  slice(1:15) %&gt;%
-  mutate(title = ifelse(str_detect(title, &quot;arry&quot;), str_sub(title, -17, -2), title)) %&gt;%
-  arrange(-n, title) %&gt;%
-  mutate(title = forcats::fct_reorder(title, n))
-
-# est variable is added by manually exploring data
-df %&gt;%
-  bind_cols(est = c(1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0)) %&gt;%
-  mutate(`cntry` = ifelse(est == 1, &quot;Estonian&quot;, &quot;other&quot;)) %&gt;%
-  ggplot(aes(title, n / n_not_zero)) +
-  geom_bar(stat = &quot;identity&quot;, aes(fill = cntry)) +
-  coord_flip() +
-  scale_y_continuous(labels = scales::percent) +
-  scale_fill_manual(values = c(&quot;#0072CE&quot;, &quot;#000000&quot;),
-                    name = &quot;Book author \nnationality&quot;) +
-  labs(x = &quot;&quot;, y = &quot;% of users in goodreads &#39;Eesti Estonia&#39; \ngroup who had read the book&quot;) +
-  geom_text(data = df %&gt;% slice(1) %&gt;% mutate(text = paste(n, &quot;out of&quot;, n_not_zero)),
-            aes(title, n / n_not_zero - .055, label = text), color = &quot;white&quot;, size = 3) +
-  hrbrthemes::theme_ipsum() +
-  theme(axis.text =  element_text(size = 11),
-        axis.title.x = element_text(size = 11),
-        legend.text = element_text(size = 11))</code></pre>
-<p><img src="/post/2018-02-04-goodreads-what-books-estoniareads_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code># df &lt;- shelves %&gt;%
+#   count(title) %&gt;%
+#   arrange(-n) %&gt;%
+#   slice(1:15) %&gt;%
+#   mutate(title = ifelse(str_detect(title, &quot;arry&quot;), str_sub(title, -17, -2), title)) %&gt;%
+#   arrange(-n, title) %&gt;%
+#   mutate(title = forcats::fct_reorder(title, n))
+# 
+# # est variable is added by manually exploring data
+# df %&gt;%
+#   bind_cols(est = c(1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0)) %&gt;%
+#   mutate(`cntry` = ifelse(est == 1, &quot;Estonian&quot;, &quot;other&quot;)) %&gt;%
+#   ggplot(aes(title, n / n_not_zero)) +
+#   geom_bar(stat = &quot;identity&quot;, aes(fill = cntry)) +
+#   coord_flip() +
+#   scale_y_continuous(labels = scales::percent) +
+#   scale_fill_manual(values = c(&quot;#0072CE&quot;, &quot;#000000&quot;),
+#                     name = &quot;Book author \nnationality&quot;) +
+#   labs(x = &quot;&quot;, y = &quot;% of users in goodreads &#39;Eesti Estonia&#39; \ngroup who had read the book&quot;) +
+#   geom_text(data = df %&gt;% slice(1) %&gt;% mutate(text = paste(n, &quot;out of&quot;, n_not_zero)),
+#             aes(title, n / n_not_zero - .055, label = text), color = &quot;white&quot;, size = 3) +
+#   hrbrthemes::theme_ipsum() +
+#   theme(axis.text =  element_text(size = 11),
+#         axis.title.x = element_text(size = 11),
+#         legend.text = element_text(size = 11))</code></pre>
 <p>A.H Tammsaare <a href="https://www.goodreads.com/book/show/7704481">Tõde ja õigus I</a> takes the first place. More than one quarter of group members have this Estonian classic in their <code>read</code> shelf. My initial guess was that Estonian authors books are dominating the list.<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> Nevertheless, I am happy to see books of 5 Estonian authors in TOP15. The popularity of Harry Potter series came to me as a little surprise. I think it was surprising for me because I am biased - I have not read any of them myself. When scrolling through “Eesti loeb” campaign photos of <a href="https://kultuur.err.ee/677126/fotod-lugejad-koos-oma-lemmikraamatutega">readers with their favourite books</a> we see both authors, A.H Tammsaare and J.K Rowling, mentioned more than once.</p>
 </div>
 <div class="footnotes">
