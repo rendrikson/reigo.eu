@@ -93,7 +93,9 @@ Now we can get all group members ID's and use these ID's to programmatically fin
 members <- map_df(1:23, function(p) {
   get_group(group_id = 45927, gr_api_key = api_key, page = p) %>% 
     group_to_df()
+})
 
+# this will take a while :)
 shelves <- map_df(members$member_id, function(id) {
   
   shelf <- map_df(1:5, function(page) {
