@@ -13,7 +13,7 @@ slug: goodreads-what-books-estoniareads
 
 But what books are the most popular ones among Estonians? We are going to answer this question (inspired by the campaign) by analyzing books read by people in [Eesti Estonia](https://www.goodreads.com/group/show/45927-eesti-estonia) group in goodreads. [R](https://en.wikipedia.org/wiki/R_(programming_language)) will be used to get and analyze data.
 
-If you are not intrested in R stuff, then feel free to jump to [results](#results).
+If you are not interested in R stuff, then feel free to jump to [results](#results).
 
 # API
 
@@ -29,7 +29,7 @@ api_key <- Sys.getenv("GOODREADS_API_KEY")
 
 # Getting data
 
-Our plan is to get user ID-s of the members of [Eesti Estonia](https://www.goodreads.com/group/show/45927-eesti-estonia) goodreads group. Using these ID-s we can get the books users have in their `read` shelves. Having this data we can easily find out which books are read by how many group members. We use functions `get_group()` and `get_shelf()` to get the raw data. For getting beautiful `tibbles` out of raw data we use functions `group_to_df()` and `shelf_to_df()`[^1]:  
+Our plan is to get user ID-s of the members of [Eesti Estonia](https://www.goodreads.com/group/show/45927-eesti-estonia) goodreads group. Using these ID-s we can get the books users have in their `read` shelves. Having this data we can easily find out which books are read by how many group members. We use functions `get_group()` and `get_shelf()` to get the raw data. For getting beautiful `tibbles` out of raw data we use functions[^1] `group_to_df()` and `shelf_to_df()`:  
 
 ```{r fns1, message=FALSE, warning=FALSE}
 library(tidyverse)
@@ -50,20 +50,18 @@ get_group <- function(group_id = 45927, gr_api_key, page = 1) {
   members
 }
 
-get_shelf <- function(gr_id, gr_api_key, n = 9999,
+get_shelf <- function(gr_id, gr_api_key, n = 200, page = 1, 
                       shelf = c("read", "currently-reading", "to-read")) {
-
   # functions for getting shelf content
   url <- "https://www.goodreads.com/review/list?"
+  shelf <- shelf[1]
   shelf <- GET(
     url = url, 
-    query = list(v = 2, key = gr_api_key, id = gr_id,
-      shelf = shelf[1], per_page = n
-    )
+    query = list(v = 2, key = gr_api_key, id = gr_id, 
+                 shelf = shelf, per_page = n, page = page)
   )
-  
   shelf_contents <- content(shelf, as = "parsed")
-  shelf_contents
+  return(shelf_contents)
 }
 
 group_to_df <- function(group) {
@@ -87,10 +85,9 @@ shelf_to_df <- function(shelf) {
 }
 ```
 
-We can look up  group ID from its [URL](https://www.goodreads.com/group/show/45927-eesti-estonia), which for "Eesti Estonia" group is `45927`. In the time of writing this post there was 23 pages of members in the group, totalling little less than `r 23*30` members. 
+We can look up "Eesti Estonia" group ID from its [URL](https://www.goodreads.com/group/show/45927-eesti-estonia), which is `45927`. In the time of writing this post there was 23 pages of members in the group, totalling little less than `r 23*30` members. 
 
-Now we can get all group members ID's and use these ID's to programmatically find and download users shelves. We use `purrr::map_df` for getting and storing members ID's and shelves. Since not all members allow accessing their data and some members have not listed any books in their `read` shelf, we use `tryCatch()` to avoid our loop breaking down while seeing some anomalies. We also save shelves one by one to get the number of members who have read at last 1 book. We use this number as an effective group size. It comes handy when evaluating percentage of members who have read a certain book.[^2]  
-
+Now we can get all group members ID's and use these ID's to programmatically find and download users shelves. We use `purrr::map_df` for getting and storing members ID's and shelves. Since not all members allow accessing their data and some members have not listed any books in their `read` shelves, we use `tryCatch()` to avoid our loop breaking down.  We save shelves one by one to get the number of members who have read at last 1 book. We use this number as an effective group size, which comes handy when evaluating percentage of members who have read a certain book.[^2] Also, notice that the code below downloads first 1000 books (we download first 5 pages, each max 200 entries) users has in her `read` shelf.[^4] 
 
 ```{r members_and_shelves, eval=FALSE}
 members <- map_df(1:23, function(p) {
@@ -98,14 +95,18 @@ members <- map_df(1:23, function(p) {
     group_to_df()
 
 shelves <- map_df(members$member_id, function(id) {
-
-  x <- tryCatch({
-    x <- get_shelf(gr_id = id, gr_api_key = api_key, shelf = "read", n = 200) 
-    x <- shelf_to_df(x)
-    x
-  }, error = function(cond) data_frame())
-  saveRDS(x, paste0("shelves/read-", id, ".rds"))
-  x
+  
+  shelf <- map_df(1:5, function(page) {
+    x <- get_shelf(gr_id = id, gr_api_key = api_key,
+                   shelf = "read", n = 200, page = page)
+    tryCatch({
+      shelf_to_df(shelf = x)
+    }, error = function(cond) data_frame())
+  }) 
+  
+  saveRDS(shelf, paste0("shelves/read-", id, ".rds"))
+  shelf
+  
 })
 
 n_not_zero <- map(dir("/shelves", full.names = T), readRDS) %>% 
@@ -120,45 +121,49 @@ saveRDS(shelves, "shelves.rds")
 
 
 ```{r read_members_shelves, echo=FALSE}
-# members <- readRDS("/home/reigo/blog/goodreads/members.rds")
-# shelves <- readRDS("/home/reigo/blog/goodreads/shelves.rds")
-# n_not_zero <- map(dir("/home/reigo/blog/goodreads/shelves/", full.names = T), readRDS) %>%
-#   map_lgl(function(x) nrow(x) > 0) %>% sum()
+members <- readRDS("/home/reigo/blog/goodreads/members.rds")
+shelves <- readRDS("/home/reigo/blog/goodreads/shelves.rds")
+n_not_zero <- map(dir("/home/reigo/blog/goodreads/shelves/", full.names = T), readRDS) %>%
+  map_lgl(function(x) nrow(x) > 0) %>% sum()
 ```
 
 Having this data we can easily find out which are the most popular books among the group members:
 
 ```{r, message=FALSE}
-# df <- shelves %>%
-#   count(title) %>%
-#   arrange(-n) %>%
-#   slice(1:15) %>%
-#   mutate(title = ifelse(str_detect(title, "arry"), str_sub(title, -17, -2), title)) %>%
-#   arrange(-n, title) %>%
-#   mutate(title = forcats::fct_reorder(title, n))
-# 
-# # est variable is added by manually exploring data
-# df %>%
-#   bind_cols(est = c(1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0)) %>%
-#   mutate(`cntry` = ifelse(est == 1, "Estonian", "other")) %>%
-#   ggplot(aes(title, n / n_not_zero)) +
-#   geom_bar(stat = "identity", aes(fill = cntry)) +
-#   coord_flip() +
-#   scale_y_continuous(labels = scales::percent) +
-#   scale_fill_manual(values = c("#0072CE", "#000000"),
-#                     name = "Book author \nnationality") +
-#   labs(x = "", y = "% of users in goodreads 'Eesti Estonia' \ngroup who had read the book") +
-#   geom_text(data = df %>% slice(1) %>% mutate(text = paste(n, "out of", n_not_zero)),
-#             aes(title, n / n_not_zero - .055, label = text), color = "white", size = 3) +
-#   hrbrthemes::theme_ipsum() +
-#   theme(axis.text =  element_text(size = 11),
-#         axis.title.x = element_text(size = 11),
-#         legend.text = element_text(size = 11))
+df <- shelves %>%
+  count(title) %>%
+  arrange(-n) %>%
+  slice(1:15) %>%
+  mutate(title = ifelse(str_detect(title, "arry"), str_sub(title, -17, -2), title)) %>%
+  arrange(-n, title) %>%
+  mutate(title = forcats::fct_reorder(title, n))
+
+# est variable is added by manually exploring data
+df %>%
+  bind_cols(est = c(1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0)) %>%
+  mutate(`cntry` = ifelse(est == 1, "Estonian", "other")) %>%
+  ggplot(aes(title, n / n_not_zero)) +
+  geom_bar(stat = "identity", aes(fill = cntry)) +
+  coord_flip() +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c("#0072CE", "#000000"),
+                    name = "Book author \nnationality") +
+  labs(x = "", y = "% of users in goodreads 'Eesti Estonia' \ngroup who had read the book") +
+  geom_text(data = df %>% slice(1) %>% mutate(text = paste(n, "out of", n_not_zero)),
+            aes(title, n / n_not_zero - .055, label = text), color = "white", size = 3) +
+  hrbrthemes::theme_ipsum() +
+  theme(axis.text =  element_text(size = 11),
+        axis.title.x = element_text(size = 11),
+        legend.text = element_text(size = 11))
 ```
 
-A.H Tammsaare [Tõde ja õigus I](https://www.goodreads.com/book/show/7704481) takes the first place. More than one quarter of group members have this Estonian classic in their `read` shelf. My initial guess was that Estonian authors books are dominating the list.[^3] Nevertheless, I am happy to see books of 5 Estonian authors in TOP15. The popularity of Harry Potter series came to me as a little surprise. I think it was surprising for me because I am biased - I have not read any of them myself. When scrolling through "Eesti loeb" campaign photos of [readers with their favourite books](https://kultuur.err.ee/677126/fotod-lugejad-koos-oma-lemmikraamatutega) we see both authors, A.H Tammsaare and J.K Rowling, mentioned more than once.
+Andurs Kivirähk's [Rehepapp ehk november](https://www.goodreads.com/book/show/6347735) takes the first place. Almost 40% of group members have it in their `read` shelf. [Movie version](http://www.imdb.com/title/tt6164502/) of "Rehepapp ehk november" aired in 2017, which gives us a second channel to discover this popular story. 
+
+On the fourth place we see one of the Estonian classics - A.H Tammsaare's [Tõde ja õigus I](https://www.goodreads.com/book/show/7704481).
+My initial guess was that books by Estonian authors are dominating the list.[^3] Nevertheless, I am happy to see 4 books of Estonian author in TOP15. The popularity of Harry Potter series came to me as a little surprise. I think it was surprising for me because I am biased - I have not read any of them myself. When scrolling through "Eesti loeb" campaign photos of [readers with their favourite books](https://kultuur.err.ee/677126/fotod-lugejad-koos-oma-lemmikraamatutega) we see both authors, A.H Tammsaare and J.K Rowling, mentioned more than once.
 
 
 [^1]: Half the credit for functions seen below goes to Max Humber's [blog post](http://maxhumber.com/goodreads-API-r) about how to use goodreads API in R.  
-[^2]: Real percentages may obviously differ, but for our purposes I find it good enough approximation.
+[^2]: Real percentages may obviously differ, but for our purposes I find it good enough approximation. If your your `read` shelf is empty, then you are probably not active in goodreads.
 [^3]: When considering Harry Potter series as one book, the Estonian/other ratio in TOP15 will remain same. 
+[^4]: There was 8 members having more than 1000 books in their `read` shelf, which means our book stats can off by 8.
