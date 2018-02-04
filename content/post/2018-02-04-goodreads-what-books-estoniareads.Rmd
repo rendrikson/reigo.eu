@@ -120,40 +120,40 @@ saveRDS(shelves, "shelves.rds")
 
 
 ```{r read_members_shelves, echo=FALSE}
-members <- readRDS("/home/reigo/blog/goodreads/members.rds")
-shelves <- readRDS("/home/reigo/blog/goodreads/shelves.rds")
-n_not_zero <- map(dir("/home/reigo/blog/goodreads/shelves/", full.names = T), readRDS) %>%
-  map_lgl(function(x) nrow(x) > 0) %>% sum()
+# members <- readRDS("/home/reigo/blog/goodreads/members.rds")
+# shelves <- readRDS("/home/reigo/blog/goodreads/shelves.rds")
+# n_not_zero <- map(dir("/home/reigo/blog/goodreads/shelves/", full.names = T), readRDS) %>%
+#   map_lgl(function(x) nrow(x) > 0) %>% sum()
 ```
 
 Having this data we can easily find out which are the most popular books among the group members:
 
 ```{r, message=FALSE}
-df <- shelves %>%
-  count(title) %>%
-  arrange(-n) %>%
-  slice(1:15) %>%
-  mutate(title = ifelse(str_detect(title, "arry"), str_sub(title, -17, -2), title)) %>%
-  arrange(-n, title) %>%
-  mutate(title = forcats::fct_reorder(title, n))
-
-# est variable is added by manually exploring data
-df %>%
-  bind_cols(est = c(1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0)) %>%
-  mutate(`cntry` = ifelse(est == 1, "Estonian", "other")) %>%
-  ggplot(aes(title, n / n_not_zero)) +
-  geom_bar(stat = "identity", aes(fill = cntry)) +
-  coord_flip() +
-  scale_y_continuous(labels = scales::percent) +
-  scale_fill_manual(values = c("#0072CE", "#000000"),
-                    name = "Book author \nnationality") +
-  labs(x = "", y = "% of users in goodreads 'Eesti Estonia' \ngroup who had read the book") +
-  geom_text(data = df %>% slice(1) %>% mutate(text = paste(n, "out of", n_not_zero)),
-            aes(title, n / n_not_zero - .055, label = text), color = "white", size = 3) +
-  hrbrthemes::theme_ipsum() +
-  theme(axis.text =  element_text(size = 11),
-        axis.title.x = element_text(size = 11),
-        legend.text = element_text(size = 11))
+# df <- shelves %>%
+#   count(title) %>%
+#   arrange(-n) %>%
+#   slice(1:15) %>%
+#   mutate(title = ifelse(str_detect(title, "arry"), str_sub(title, -17, -2), title)) %>%
+#   arrange(-n, title) %>%
+#   mutate(title = forcats::fct_reorder(title, n))
+# 
+# # est variable is added by manually exploring data
+# df %>%
+#   bind_cols(est = c(1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0)) %>%
+#   mutate(`cntry` = ifelse(est == 1, "Estonian", "other")) %>%
+#   ggplot(aes(title, n / n_not_zero)) +
+#   geom_bar(stat = "identity", aes(fill = cntry)) +
+#   coord_flip() +
+#   scale_y_continuous(labels = scales::percent) +
+#   scale_fill_manual(values = c("#0072CE", "#000000"),
+#                     name = "Book author \nnationality") +
+#   labs(x = "", y = "% of users in goodreads 'Eesti Estonia' \ngroup who had read the book") +
+#   geom_text(data = df %>% slice(1) %>% mutate(text = paste(n, "out of", n_not_zero)),
+#             aes(title, n / n_not_zero - .055, label = text), color = "white", size = 3) +
+#   hrbrthemes::theme_ipsum() +
+#   theme(axis.text =  element_text(size = 11),
+#         axis.title.x = element_text(size = 11),
+#         legend.text = element_text(size = 11))
 ```
 
 A.H Tammsaare [Tõde ja õigus I](https://www.goodreads.com/book/show/7704481) takes the first place. More than one quarter of group members have this Estonian classic in their `read` shelf. My initial guess was that Estonian authors books are dominating the list.[^3] Nevertheless, I am happy to see books of 5 Estonian authors in TOP15. The popularity of Harry Potter series came to me as a little surprise. I think it was surprising for me because I am biased - I have not read any of them myself. When scrolling through "Eesti loeb" campaign photos of [readers with their favourite books](https://kultuur.err.ee/677126/fotod-lugejad-koos-oma-lemmikraamatutega) we see both authors, A.H Tammsaare and J.K Rowling, mentioned more than once.
