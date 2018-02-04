@@ -125,7 +125,7 @@ df %&gt;%
   scale_y_continuous(labels = scales::percent) +
   scale_fill_manual(values = c(&quot;#0072CE&quot;, &quot;#000000&quot;),
                     name = &quot;Book author \nnationality&quot;) +
-  labs(x = &quot;&quot;, y = &quot;% of users in goodreads &#39;Eesti Estonia&#39; \ngroup who had read the book&quot;) +
+  labs(x = &quot;&quot;, y = &quot;% of users in goodreads &#39;Eesti Estonia&#39; \ngroup who have read the book&quot;) +
   geom_text(data = df %&gt;% slice(1) %&gt;% mutate(text = paste(n, &quot;out of&quot;, n_not_zero)),
             aes(title, n / n_not_zero - .055, label = text), color = &quot;white&quot;, size = 3) +
   hrbrthemes::theme_ipsum() +

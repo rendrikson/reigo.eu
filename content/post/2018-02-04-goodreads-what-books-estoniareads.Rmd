@@ -150,7 +150,7 @@ df %>%
   scale_y_continuous(labels = scales::percent) +
   scale_fill_manual(values = c("#0072CE", "#000000"),
                     name = "Book author \nnationality") +
-  labs(x = "", y = "% of users in goodreads 'Eesti Estonia' \ngroup who had read the book") +
+  labs(x = "", y = "% of users in goodreads 'Eesti Estonia' \ngroup who have read the book") +
   geom_text(data = df %>% slice(1) %>% mutate(text = paste(n, "out of", n_not_zero)),
             aes(title, n / n_not_zero - .055, label = text), color = "white", size = 3) +
   hrbrthemes::theme_ipsum() +
