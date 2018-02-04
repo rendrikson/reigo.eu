@@ -1,6 +1,6 @@
 baseurl = "/"
 publishDir = "public"
-title = "Hugo Tanka Theme"
+title = "reigo.eu"
 author = "Nan Xiao"
 canonifyurls = true
 languagecode = "en"
