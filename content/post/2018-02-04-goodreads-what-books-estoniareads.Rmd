@@ -157,7 +157,7 @@ df %>%
         legend.text = element_text(size = 11))
 ```
 
-Andurs Kivirähk's [Rehepapp ehk november](https://www.goodreads.com/book/show/6347735) takes the first place. Almost 40% of group members have it in their `read` shelf. [Movie version](http://www.imdb.com/title/tt6164502/) of "Rehepapp ehk november" aired in 2017, which gives us a second channel to discover this popular story. 
+Andurs Kivirähk's [Rehepapp ehk november](https://www.goodreads.com/book/show/6347735) takes the first place. Almost 40% of group members have it in their `read` shelf. [Movie version](http://www.imdb.com/title/tt6164502/) of "Rehepapp ehk november" aired in 2017, which gives anyone interested a second medium to discover this popular story. 
 
 On the fourth place we see one of the Estonian classics - A.H Tammsaare's [Tõde ja õigus I](https://www.goodreads.com/book/show/7704481).
 My initial guess was that books by Estonian authors are dominating the list.[^3] Nevertheless, I am happy to see 4 books of Estonian author in TOP15. The popularity of Harry Potter series came to me as a little surprise. I think it was surprising for me because I am biased - I have not read any of them myself. When scrolling through "Eesti loeb" campaign photos of [readers with their favourite books](https://kultuur.err.ee/677126/fotod-lugejad-koos-oma-lemmikraamatutega) we see both authors, A.H Tammsaare and J.K Rowling, mentioned more than once.
