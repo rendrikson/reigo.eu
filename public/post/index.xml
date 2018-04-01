@@ -6,17 +6,28 @@
     <description>Recent content in Posts on reigo.eu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 04 Feb 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 01 Apr 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>Use shortcodes to embed tweets, videos, etc. in your blogdown blog posts</title>
+      <link>/2018/04/shortcodes/</link>
+      <pubDate>Sun, 01 Apr 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/04/shortcodes/</guid>
+      <description>Shortcodes are simple snippets inside your content files calling built-in or custom templates. This short post is a shout-out for the blogdown::shortcode() function. Example(s) of blogdown::shortcode() can be found in blogdown book. To learn more about shortcodes visit https://gohugo.io/content-management/shortcodes/.
+Shortcodes make it super easy to embed content in blog posts. Lets say we have a video we want to embed in a post: https://youtu.be/CjTLN-FXiFA. By adding
+```{r, eval=TRUE} blogdown::shortcode(&amp;quot;youtube&amp;quot;, &amp;quot;CjTLN-FXiFA&amp;quot;) ``` to our .</description>
+    </item>
+    
+    <item>
       <title>goodreads: what books #estoniareads?</title>
-      <link>/post/goodreads-what-books-estoniareads/</link>
+      <link>/2018/02/goodreads-what-books-estoniareads/</link>
       <pubDate>Sun, 04 Feb 2018 00:00:00 +0000</pubDate>
       
-      <guid>/post/goodreads-what-books-estoniareads/</guid>
+      <guid>/2018/02/goodreads-what-books-estoniareads/</guid>
       <description>Estonian National Broadcasting Agency run a wonderful campaign called “Eesti loeb” (Estonia reads), where people were asked to post a picture of themselves with a book they are reading (or have read) and find inspiring. Photos of readers with their favourite books were published afterwards.
 But which books are the most popular ones among Estonians? We are going to answer this question (inspired by the campaign) by analyzing books read by people in Eesti Estonia group in goodreads.</description>
     </item>
