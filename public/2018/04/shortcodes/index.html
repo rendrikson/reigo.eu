@@ -1,0 +1,146 @@
+<link rel="stylesheet" href="/css/agate.css" rel="stylesheet" id="theme-stylesheet">
+<script src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  
+
+  <link rel="icon" type="image/png" href="/favicon.png">
+
+  <title>
+    
+    
+     Use shortcodes to embed tweets, videos, etc. in your blogdown blog posts 
+    
+  </title>
+  <link rel="canonical" href="/2018/04/shortcodes/">
+
+  <link rel="stylesheet" href="/css/fonts.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+
+  
+</head>
+
+<body>
+<section id=nav>
+  <h1><a href="/">reigo.eu</a></h1>
+  <ul>
+    
+    <li><a href="/">Home</a></li>
+    
+    <li><a href="https://github.com/rendrikson">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/ReigoHendrikson">Twitter</a></li>
+    
+  </ul>
+</section>
+
+
+<section id=content>
+  <h1> Use shortcodes to embed tweets, videos, etc. in your blogdown blog posts </h1>
+
+  <div id=sub-header>
+     · 2018/04/01 · 3 minute read
+  </div>
+
+  <div class="entry-content">
+    <p><a href="https://gohugo.io/content-management/shortcodes/">Shortcodes are simple snippets inside your content files calling built-in or custom templates.</a> This short post is a shout-out for the <code>blogdown::shortcode()</code> function. Example(s) of <code>blogdown::shortcode()</code> can be found in <a href="https://bookdown.org/yihui/blogdown/content.html#shortcode">blogdown book</a>. To learn more about shortcodes visit <a href="https://gohugo.io/content-management/shortcodes/" class="uri">https://gohugo.io/content-management/shortcodes/</a>.</p>
+<p>Shortcodes make it super easy to embed content in blog posts. Lets say we have a video we want to embed in a post: <a href="https://youtu.be/CjTLN-FXiFA" class="uri">https://youtu.be/CjTLN-FXiFA</a>. By adding</p>
+<pre><code>```{r, eval=TRUE}
+blogdown::shortcode(&quot;youtube&quot;, &quot;CjTLN-FXiFA&quot;)
+```</code></pre>
+<p>to our <code>.Rmd</code> file, we get: 
+<div style="position: relative; padding-bottom: 56.25%; padding-top: 30px; height: 0; overflow: hidden;">
+  <iframe src="//www.youtube.com/embed/CjTLN-FXiFA" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" allowfullscreen frameborder="0" title="YouTube Video"></iframe>
+ </div>
+</p>
+<div id="how-i-discovered-shortcodes" class="section level1">
+<h1>How I discovered shortcodes</h1>
+<p>For some time I have had the routine of (scrolling twitter and) sending tweets holding information I see myself using to my e-mail. For example, I find <span class="citation">@rensa_co</span>’s example of <code>dplyr::case_when()</code> and <code>geom_text()</code> to be quite useful:</p>
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">💡 dplyr::case_when goes really well with geom_text (or ggrepel) for when you want to programmatically label a few of the most interesting features in your <a href="https://twitter.com/hashtag/rstats?src=hash&amp;ref_src=twsrc%5Etfw">#rstats</a> plots! And the criteria can be as complex as you want 🎉 <a href="https://t.co/0jUp1uarde">pic.twitter.com/0jUp1uarde</a></p>&mdash; James Goldie (@rensa_co) <a href="https://twitter.com/rensa_co/status/976340414016843776?ref_src=twsrc%5Etfw">March 21, 2018</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<p>So I sent it to my (work or personal - I’m not sure which) e-mail with hopes to easily find it in the future. One can experience the pain of the e-mail system after first time really looking for something. One can quickly understand that there must exist a better way. As I was looking for a way to archive all these pearls, I was thinking about devoting a blog post to those tweets. I started by looking for a way to embed twitter cards to blog post written with <code>blogdown</code>. I googeled “how to embed tweet in rmarkdown” which not surprisingly lead me to <a href="https://stackoverflow.com/questions/46529953/how-to-include-arbitrary-html-in-rmarkdown-document">stackoverflow</a>. This question was answered by <a href="https://yihui.name/">Yihui</a> and pointed to the <a href="https://bookdown.org/yihui/blogdown/content.html">blogdown documentation</a> where I learned about <code>shortcode()</code> function.</p>
+</div>
+<div id="fin" class="section level1">
+<h1>FIN</h1>
+<p>After giving the blog post approach a second thought I realized that this is probably not gonna work. It seemed to be too much hassle to update the post manually or figure out how to automate the process. I ended up creating a <em>#rhtwotes</em> (rh - my initials; twote<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> - twitter note/quote) and the plan is to retweet things I see myself using with <em>#rhtwotes</em> hashtag. This gives me easy access to my <em>twotes</em> whenever I have internet connections and also simplifies (retweeting is easier than sending an e-mail) note taking part.</p>
+<p>For now, using the hashtag system feels quite natural and optimal way to cover my use case. I also ask myself: “How could I use something not as simple as retweeting system before?”. As it often happens, <em>obvious</em> solutions for our problems become <em>obvious</em> only after we have tried many not so <em>obvious</em> ones.</p>
+<p><a href="https://twitter.com/hashtag/rhtwote" target="_blank"><em>#rhtwotes</em></a></p>
+<!-- One extra thing I learned writing this post is how to add verbatim code chunks to posts written in rmarkown. Learn more from Yihui's  [blog](https://yihui.name/en/2017/11/knitr-verbatim-code-chunk/). -->
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>I first had <em>tnotes</em> for twitter notes in mind. Fortunately ML proposed <em>twote</em> which has much better sounding. Word <em>twote</em> seems to have wider usage as well: <a href="https://www.urbandictionary.com/define.php?term=Twote" class="uri">https://www.urbandictionary.com/define.php?term=Twote</a><a href="#fnref1">↩</a></p></li>
+</ol>
+</div>
+
+  </div>
+
+  <div id=links>
+    
+      <a class="basic-alignment left" href="/2018/02/goodreads-what-books-estoniareads/">&laquo; goodreads: what books #estoniareads?</a>
+    
+    
+  </div>
+</section>
+
+<section id="comments">
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+
+(function() {
+      
+      
+      if (window.location.hostname == "localhost")
+                return;
+
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      var disqus_shortname = 'reigo';
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+<div id="disqus_thread"></div>
+<script>
+
+
+
+
+
+(function() { 
+var d = document, s = d.createElement('script');
+s.src = 'https://reigo.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-113538088-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+  
+
+
+</body>
+</html>
+

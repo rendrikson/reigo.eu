@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blogdown on reigo.eu</title>
+    <link>/tags/blogdown/</link>
+    <description>Recent content in Blogdown on reigo.eu</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 01 Apr 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/blogdown/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Use shortcodes to embed tweets, videos, etc. in your blogdown blog posts</title>
+      <link>/2018/04/shortcodes/</link>
+      <pubDate>Sun, 01 Apr 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/04/shortcodes/</guid>
+      <description>Shortcodes are simple snippets inside your content files calling built-in or custom templates. This short post is a shout-out for the blogdown::shortcode() function. Example(s) of blogdown::shortcode() can be found in blogdown book. To learn more about shortcodes visit https://gohugo.io/content-management/shortcodes/.
+Shortcodes make it super easy to embed content in blog posts. Lets say we have a video we want to embed in a post: https://youtu.be/CjTLN-FXiFA. By adding
+```{r, eval=TRUE} blogdown::shortcode(&amp;quot;youtube&amp;quot;, &amp;quot;CjTLN-FXiFA&amp;quot;) ``` to our .</description>
+    </item>
+    
+  </channel>
+</rss>

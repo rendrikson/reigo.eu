@@ -1,0 +1,46 @@
+---
+title: Use shortcodes to embed tweets, videos, etc. in your blogdown blog posts
+author: ''
+date: '2018-04-01'
+slug: shortcodes
+categories: []
+tags:
+  - R
+  - blogdown
+---
+
+[Shortcodes are simple snippets inside your content files calling built-in or custom templates.](https://gohugo.io/content-management/shortcodes/) This short post is a shout-out for the `blogdown::shortcode()` function. Example(s) of `blogdown::shortcode()` can  be found in [blogdown book](https://bookdown.org/yihui/blogdown/content.html#shortcode). To learn more about shortcodes visit [https://gohugo.io/content-management/shortcodes/](https://gohugo.io/content-management/shortcodes/).
+
+Shortcodes make it super easy to embed content in blog posts. Lets say we have a video we want to embed in a post: [https://youtu.be/CjTLN-FXiFA](https://youtu.be/CjTLN-FXiFA). By adding
+
+````
+```{r, eval=TRUE}`r ''`
+blogdown::shortcode("youtube", "CjTLN-FXiFA")
+```
+````
+
+to our `.Rmd` file, we get: `r blogdown::shortcode("youtube", "CjTLN-FXiFA")`
+
+
+# How I discovered shortcodes
+
+For some time I have had the routine of (scrolling twitter and) sending tweets holding information I see myself using to my e-mail. For example, I find @rensa_co's example of `dplyr::case_when()` and `geom_text()` to be quite useful:    
+
+```{r, echo=FALSE}
+blogdown::shortcode("tweet", "976340414016843776")
+```
+
+So I sent it to my (work or personal - I'm not sure which) e-mail  with hopes to easily find it in the future. One can experience the pain of the e-mail system after first time really looking for something. One can quickly understand that there must exist a better way. As I was looking for a way to archive all these pearls, I was thinking about devoting a blog post to those tweets. I started by looking for a way to embed twitter cards to blog post written with `blogdown`. I googeled "how to embed tweet in rmarkdown" which not surprisingly lead me to [stackoverflow](https://stackoverflow.com/questions/46529953/how-to-include-arbitrary-html-in-rmarkdown-document). This question was answered by [Yihui](https://yihui.name/) and pointed to the [blogdown documentation](https://bookdown.org/yihui/blogdown/content.html) where I learned about `shortcode()` function.  
+
+
+# FIN
+
+After giving the blog post approach a second thought I realized that this is probably not gonna work. It seemed to be too much hassle to update the post manually or  figure out how to automate the process. I ended up creating a _#rhtwotes_ (rh - my initials; twote[^1] - twitter note/quote) and the plan is to retweet things I see myself using with _#rhtwotes_ hashtag. This gives me easy access to my _twotes_ whenever I have internet connections and also simplifies (retweeting is easier than sending an e-mail) note taking part.
+
+For now, using the hashtag system feels quite natural and optimal way to cover my use case. I also ask myself: "How could I use something not as simple as retweeting system before?". As it often happens, _obvious_ solutions for our problems become _obvious_ only after we have tried many not so _obvious_ ones.     
+
+[_#rhtwotes_](https://twitter.com/hashtag/rhtwote){target="_blank"}
+
+<!-- One extra thing I learned writing this post is how to add verbatim code chunks to posts written in rmarkown. Learn more from Yihui's  [blog](https://yihui.name/en/2017/11/knitr-verbatim-code-chunk/). -->
+
+[^1]: I first had _tnotes_ for twitter notes in mind. Fortunately ML proposed _twote_ which has much better sounding. Word _twote_ seems to have wider usage as well: [https://www.urbandictionary.com/define.php?term=Twote](https://www.urbandictionary.com/define.php?term=Twote)

@@ -1,0 +1,38 @@
+---
+title: Use shortcodes to embed tweets, videos, etc. in your blogdown blog posts
+author: ''
+date: '2018-04-01'
+slug: shortcodes
+categories: []
+tags:
+  - R
+  - blogdown
+---
+
+
+
+<p><a href="https://gohugo.io/content-management/shortcodes/">Shortcodes are simple snippets inside your content files calling built-in or custom templates.</a> This short post is a shout-out for the <code>blogdown::shortcode()</code> function. Example(s) of <code>blogdown::shortcode()</code> can be found in <a href="https://bookdown.org/yihui/blogdown/content.html#shortcode">blogdown book</a>. To learn more about shortcodes visit <a href="https://gohugo.io/content-management/shortcodes/" class="uri">https://gohugo.io/content-management/shortcodes/</a>.</p>
+<p>Shortcodes make it super easy to embed content in blog posts. Lets say we have a video we want to embed in a post: <a href="https://youtu.be/CjTLN-FXiFA" class="uri">https://youtu.be/CjTLN-FXiFA</a>. By adding</p>
+<pre><code>```{r, eval=TRUE}
+blogdown::shortcode(&quot;youtube&quot;, &quot;CjTLN-FXiFA&quot;)
+```</code></pre>
+<p>to our <code>.Rmd</code> file, we get: {{% youtube "CjTLN-FXiFA" %}}</p>
+<div id="how-i-discovered-shortcodes" class="section level1">
+<h1>How I discovered shortcodes</h1>
+<p>For some time I have had the routine of (scrolling twitter and) sending tweets holding information I see myself using to my e-mail. For example, I find <span class="citation">@rensa_co</span>’s example of <code>dplyr::case_when()</code> and <code>geom_text()</code> to be quite useful:</p>
+{{% tweet "976340414016843776" %}}
+<p>So I sent it to my (work or personal - I’m not sure which) e-mail with hopes to easily find it in the future. One can experience the pain of the e-mail system after first time really looking for something. One can quickly understand that there must exist a better way. As I was looking for a way to archive all these pearls, I was thinking about devoting a blog post to those tweets. I started by looking for a way to embed twitter cards to blog post written with <code>blogdown</code>. I googeled “how to embed tweet in rmarkdown” which not surprisingly lead me to <a href="https://stackoverflow.com/questions/46529953/how-to-include-arbitrary-html-in-rmarkdown-document">stackoverflow</a>. This question was answered by <a href="https://yihui.name/">Yihui</a> and pointed to the <a href="https://bookdown.org/yihui/blogdown/content.html">blogdown documentation</a> where I learned about <code>shortcode()</code> function.</p>
+</div>
+<div id="fin" class="section level1">
+<h1>FIN</h1>
+<p>After giving the blog post approach a second thought I realized that this is probably not gonna work. It seemed to be too much hassle to update the post manually or figure out how to automate the process. I ended up creating a <em>#rhtwotes</em> (rh - my initials; twote<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> - twitter note/quote) and the plan is to retweet things I see myself using with <em>#rhtwotes</em> hashtag. This gives me easy access to my <em>twotes</em> whenever I have internet connections and also simplifies (retweeting is easier than sending an e-mail) note taking part.</p>
+<p>For now, using the hashtag system feels quite natural and optimal way to cover my use case. I also ask myself: “How could I use something not as simple as retweeting system before?”. As it often happens, <em>obvious</em> solutions for our problems become <em>obvious</em> only after we have tried many not so <em>obvious</em> ones.</p>
+<p><a href="https://twitter.com/hashtag/rhtwote" target="_blank"><em>#rhtwotes</em></a></p>
+<!-- One extra thing I learned writing this post is how to add verbatim code chunks to posts written in rmarkown. Learn more from Yihui's  [blog](https://yihui.name/en/2017/11/knitr-verbatim-code-chunk/). -->
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>I first had <em>tnotes</em> for twitter notes in mind. Fortunately ML proposed <em>twote</em> which has much better sounding. Word <em>twote</em> seems to have wider usage as well: <a href="https://www.urbandictionary.com/define.php?term=Twote" class="uri">https://www.urbandictionary.com/define.php?term=Twote</a><a href="#fnref1">↩</a></p></li>
+</ol>
+</div>
