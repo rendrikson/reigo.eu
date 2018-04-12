@@ -8,7 +8,7 @@
     <language>en</language>
     <lastBuildDate>Sun, 04 Feb 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/api/index.xml" rel="self" type="application/rss+xml" />
+        <atom:link href="/tags/api/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -17,8 +17,141 @@
       <pubDate>Sun, 04 Feb 2018 00:00:00 +0000</pubDate>
       
       <guid>/2018/02/goodreads-what-books-estoniareads/</guid>
-      <description>Estonian National Broadcasting Agency run a wonderful campaign called “Eesti loeb” (Estonia reads), where people were asked to post a picture of themselves with a book they are reading (or have read) and find inspiring. Photos of readers with their favourite books were published afterwards.
-But which books are the most popular ones among Estonians? We are going to answer this question (inspired by the campaign) by analyzing books read by people in Eesti Estonia group in goodreads.</description>
+      <description>&lt;p&gt;&lt;a href=&#34;https://news.err.ee/&#34;&gt;Estonian National Broadcasting Agency&lt;/a&gt; run a wonderful campaign called “Eesti loeb” (Estonia reads), where people were asked to post a picture of themselves with a book they are reading (or have read) and find inspiring. Photos of &lt;a href=&#34;https://kultuur.err.ee/677126/fotod-lugejad-koos-oma-lemmikraamatutega&#34;&gt;readers with their favourite books&lt;/a&gt; were published afterwards.&lt;/p&gt;
+&lt;p&gt;But which books are the most popular ones among Estonians? We are going to answer this question (inspired by the campaign) by analyzing books read by people in &lt;a href=&#34;https://www.goodreads.com/group/show/45927-eesti-estonia&#34;&gt;Eesti Estonia&lt;/a&gt; group in goodreads. &lt;a href=&#34;https://en.wikipedia.org/wiki/R_(programming_language)&#34;&gt;R&lt;/a&gt; will be used to get and analyze data.&lt;/p&gt;
+&lt;p&gt;If you are not interested in R stuff, then feel free to jump to &lt;a href=&#34;#results&#34;&gt;results&lt;/a&gt;.&lt;/p&gt;
+&lt;div id=&#34;api&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;API&lt;/h1&gt;
+&lt;p&gt;First we need to get data about books read by members of &lt;a href=&#34;https://www.goodreads.com/group/show/45927-eesti-estonia&#34;&gt;Eesti Estonia&lt;/a&gt;. We are going to use &lt;a href=&#34;https://www.goodreads.com/api&#34;&gt;goodreads API&lt;/a&gt; to access the data in the website. To get an access to goodreads API one should register for a &lt;a href=&#34;https://www.goodreads.com/api/keys&#34;&gt;developer key&lt;/a&gt;. After getting goodreads API key I took advice (I chose the one that sounded most reasonable for my purposes) from &lt;a href=&#34;http://blog.revolutionanalytics.com/2015/11/how-to-store-and-use-authentication-details-with-r.html&#34;&gt;Andrie de Vries blog post&lt;/a&gt; and saved my API key to &lt;code&gt;.Renviron&lt;/code&gt; file. I also found &lt;a href=&#34;https://csgillespie.github.io/efficientR/r-startup.html&#34;&gt;“R startup” chapter in “Efficient R programming”&lt;/a&gt; to be helpful when learning about &lt;code&gt;.Renviron&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;note: as this is my first time working with API’s, any comments on how to improve the code or methods I share are more than welcomed.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;After saving goodreads API key to &lt;code&gt;.Renviron&lt;/code&gt; one can access it by:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;api_key &amp;lt;- Sys.getenv(&amp;quot;GOODREADS_API_KEY&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;getting-data&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Getting data&lt;/h1&gt;
+&lt;p&gt;Our plan is to get user ID-s of the members of &lt;a href=&#34;https://www.goodreads.com/group/show/45927-eesti-estonia&#34;&gt;Eesti Estonia&lt;/a&gt; goodreads group. Using these ID-s we can get the books users have in their &lt;code&gt;read&lt;/code&gt; shelves. Having this data we can easily find out which books are read by how many group members. We use functions &lt;code&gt;get_group()&lt;/code&gt; and &lt;code&gt;get_shelf()&lt;/code&gt; to get the raw data. For getting beautiful &lt;code&gt;tibbles&lt;/code&gt; out of raw data we use functions&lt;a href=&#34;#fn1&#34; class=&#34;footnoteRef&#34; id=&#34;fnref1&#34;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/a&gt; &lt;code&gt;group_to_df()&lt;/code&gt; and &lt;code&gt;shelf_to_df()&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tidyverse)
+library(httr)
+library(xml2)
+library(rvest)
+library(stringr)
+
+get_group &amp;lt;- function(group_id = 45927, gr_api_key, page = 1) {
+
+  # functions for getting goodreads group info
+  url &amp;lt;- paste0(&amp;quot;https://www.goodreads.com/group/members/&amp;quot;, group_id, &amp;quot;.xml&amp;quot;)
+  members &amp;lt;- httr::GET(
+    url = url, 
+    query = list(sort = &amp;quot;last_online&amp;quot;, key = gr_api_key, page = page)
+  )
+  members &amp;lt;- httr::content(members, as = &amp;quot;parsed&amp;quot;)
+  members
+}
+
+get_shelf &amp;lt;- function(gr_id, gr_api_key, n = 200, page = 1, 
+                      shelf = c(&amp;quot;read&amp;quot;, &amp;quot;currently-reading&amp;quot;, &amp;quot;to-read&amp;quot;)) {
+  # functions for getting shelf content
+  url &amp;lt;- &amp;quot;https://www.goodreads.com/review/list?&amp;quot;
+  shelf &amp;lt;- shelf[1]
+  shelf &amp;lt;- GET(
+    url = url, 
+    query = list(v = 2, key = gr_api_key, id = gr_id, 
+                 shelf = shelf, per_page = n, page = page)
+  )
+  shelf_contents &amp;lt;- content(shelf, as = &amp;quot;parsed&amp;quot;)
+  return(shelf_contents)
+}
+
+group_to_df &amp;lt;- function(group) {
+  
+  member_id &amp;lt;- group %&amp;gt;% 
+    xml_find_all(&amp;quot;//user&amp;quot;) %&amp;gt;% 
+    as_list() %&amp;gt;% 
+    map_chr(~ .$id[[1]])
+  
+  df &amp;lt;- tibble(member_id)
+  df
+}
+
+shelf_to_df &amp;lt;- function(shelf) {
+  # function for getting data frame from xml input 
+  shelf_as_list &amp;lt;- xml2::as_list(shelf)[[&amp;quot;reviews&amp;quot;]]
+  title   &amp;lt;- shelf %&amp;gt;% xml_find_all(&amp;quot;//title&amp;quot;) %&amp;gt;% xml_text()
+  book_id &amp;lt;- map_chr(shelf_as_list, ~ .$book$id[[1]])
+  df &amp;lt;- tibble(title, book_id)
+  df
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can look up “Eesti Estonia” group ID from its &lt;a href=&#34;https://www.goodreads.com/group/show/45927-eesti-estonia&#34;&gt;URL&lt;/a&gt;, which is &lt;code&gt;45927&lt;/code&gt;. In the time of writing this post there was 23 pages of members in the group, totalling little less than 690 members.&lt;/p&gt;
+&lt;p&gt;Now we can get all group members ID’s and use these ID’s to programmatically find and download users shelves. We use &lt;code&gt;purrr::map_df&lt;/code&gt; for getting and storing members ID’s and shelves. Since not all members allow accessing their data and some members have not listed any books in their &lt;code&gt;read&lt;/code&gt; shelves, we use &lt;code&gt;tryCatch()&lt;/code&gt; to avoid our loop breaking down. We save shelves one by one to get the number of members who have read at least 1 book. We use this number as an effective group size, which comes handy when evaluating percentage of members who have read a certain book.&lt;a href=&#34;#fn2&#34; class=&#34;footnoteRef&#34; id=&#34;fnref2&#34;&gt;&lt;sup&gt;2&lt;/sup&gt;&lt;/a&gt; Also, notice that the code below downloads first 1000 books (we download first 5 pages, each max 200 entries) users have in their &lt;code&gt;read&lt;/code&gt; shelves.&lt;a href=&#34;#fn3&#34; class=&#34;footnoteRef&#34; id=&#34;fnref3&#34;&gt;&lt;sup&gt;3&lt;/sup&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;members &amp;lt;- map_df(1:23, function(p) {
+  get_group(group_id = 45927, gr_api_key = api_key, page = p) %&amp;gt;% 
+    group_to_df()
+})
+
+# this will take a while :)
+shelves &amp;lt;- map_df(members$member_id, function(id) {
+  
+  shelf &amp;lt;- map_df(1:5, function(page) {
+    x &amp;lt;- get_shelf(gr_id = id, gr_api_key = api_key,
+                   shelf = &amp;quot;read&amp;quot;, n = 200, page = page)
+    tryCatch({
+      shelf_to_df(shelf = x)
+    }, error = function(cond) data_frame())
+  }) 
+  
+  saveRDS(shelf, paste0(&amp;quot;shelves/read-&amp;quot;, id, &amp;quot;.rds&amp;quot;))
+  shelf
+  
+})
+
+n_not_zero &amp;lt;- map(dir(&amp;quot;/shelves&amp;quot;, full.names = T), readRDS) %&amp;gt;% 
+  map_lgl(function(x) nrow(x) &amp;gt; 0) %&amp;gt;% sum()
+
+saveRDS(members, &amp;quot;members.rds&amp;quot;)
+saveRDS(shelves, &amp;quot;shelves.rds&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;results&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Results&lt;/h1&gt;
+&lt;p&gt;Having this data we can easily find out which are the most popular books among the group members:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;df &amp;lt;- shelves %&amp;gt;%
+  count(title) %&amp;gt;%
+  arrange(-n) %&amp;gt;%
+  slice(1:15) %&amp;gt;%
+  mutate(title = ifelse(str_detect(title, &amp;quot;arry&amp;quot;), str_sub(title, -17, -2), title)) %&amp;gt;%
+  arrange(-n, title) %&amp;gt;%
+  mutate(title = forcats::fct_reorder(title, n))
+
+# est variable is added by manually exploring data
+df %&amp;gt;%
+  bind_cols(est = c(1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0)) %&amp;gt;%
+  mutate(`cntry` = ifelse(est == 1, &amp;quot;Estonian&amp;quot;, &amp;quot;other&amp;quot;)) %&amp;gt;%
+  ggplot(aes(title, n / n_not_zero)) +
+  geom_bar(stat = &amp;quot;identity&amp;quot;, aes(fill = cntry)) +
+  coord_flip() +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c(&amp;quot;#0072CE&amp;quot;, &amp;quot;#000000&amp;quot;),
+                    name = &amp;quot;Book author \nnationality&amp;quot;) +
+  labs(x = &amp;quot;&amp;quot;, y = &amp;quot;% of users in goodreads &amp;#39;Eesti Estonia&amp;#39; \ngroup who have read the book&amp;quot;) +
+  geom_text(data = df %&amp;gt;% slice(1) %&amp;gt;% mutate(text = paste(n, &amp;quot;out of&amp;quot;, n_not_zero)),
+            aes(title, n / n_not_zero - .055, label = text), color = &amp;quot;white&amp;quot;, size = 3) +
+  hrbrthemes::theme_ipsum() +
+  theme(axis.text =  element_text(size = 11),
+        axis.title.x = element_text(size = 11),
+        legend.text = element_text(size = 11))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-02-04-goodreads-what-books-estoniareads_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Andurs Kivirähk’s &lt;a href=&#34;https://www.goodreads.com/book/show/6347735&#34;&gt;Rehepapp ehk november&lt;/a&gt; takes the first place. Almost 40% of group members have it in their &lt;code&gt;read&lt;/code&gt; shelf. &lt;a href=&#34;http://www.imdb.com/title/tt6164502/&#34;&gt;Movie version&lt;/a&gt; of “Rehepapp ehk november” aired in 2017, which gives anyone interested a second medium to discover this popular story.&lt;/p&gt;
+&lt;p&gt;On the fourth place we see one of the Estonian classics - A.H Tammsaare’s &lt;a href=&#34;https://www.goodreads.com/book/show/7704481&#34;&gt;Tõde ja õigus I&lt;/a&gt;. My initial guess was that books by Estonian authors are dominating the list.&lt;a href=&#34;#fn4&#34; class=&#34;footnoteRef&#34; id=&#34;fnref4&#34;&gt;&lt;sup&gt;4&lt;/sup&gt;&lt;/a&gt; Nevertheless, I am happy to see 4 books of Estonian author in TOP15. The popularity of Harry Potter series came to me as a little surprise. I think it was surprising for me because I am biased - I have not read any of them myself. When scrolling through “Eesti loeb” campaign photos of &lt;a href=&#34;https://kultuur.err.ee/677126/fotod-lugejad-koos-oma-lemmikraamatutega&#34;&gt;readers with their favourite books&lt;/a&gt; we see both authors, A.H Tammsaare and J.K Rowling, mentioned more than once.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+&lt;hr /&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn1&#34;&gt;&lt;p&gt;Half the credit for functions seen below goes to Max Humber’s &lt;a href=&#34;http://maxhumber.com/goodreads-API-r&#34;&gt;blog post&lt;/a&gt; about how to use goodreads API in R.&lt;a href=&#34;#fnref1&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn2&#34;&gt;&lt;p&gt;Real percentages may obviously differ, but for our purposes I find it good enough approximation. If your &lt;code&gt;read&lt;/code&gt; shelf is empty, then you are probably not active in goodreads.&lt;a href=&#34;#fnref2&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn3&#34;&gt;&lt;p&gt;There are 8 members having more than 1000 books in their &lt;code&gt;read&lt;/code&gt; shelf, which means our book stats can be off by 8.&lt;a href=&#34;#fnref3&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn4&#34;&gt;&lt;p&gt;When considering Harry Potter series as one book, the Estonian/other ratio in TOP15 will remain same.&lt;a href=&#34;#fnref4&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
     </item>
     
   </channel>

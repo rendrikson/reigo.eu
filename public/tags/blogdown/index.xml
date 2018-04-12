@@ -8,7 +8,7 @@
     <language>en</language>
     <lastBuildDate>Sun, 01 Apr 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/blogdown/index.xml" rel="self" type="application/rss+xml" />
+        <atom:link href="/tags/blogdown/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -17,9 +17,38 @@
       <pubDate>Sun, 01 Apr 2018 00:00:00 +0000</pubDate>
       
       <guid>/2018/04/shortcodes/</guid>
-      <description>Shortcodes are simple snippets inside your content files calling built-in or custom templates. This short post is a shout-out for the blogdown::shortcode() function. Example(s) of blogdown::shortcode() can be found in blogdown book. To learn more about shortcodes visit https://gohugo.io/content-management/shortcodes/.
-Shortcodes make it super easy to embed content in blog posts. Lets say we have a video we want to embed in a post: https://youtu.be/CjTLN-FXiFA. By adding
-```{r, eval=TRUE} blogdown::shortcode(&amp;quot;youtube&amp;quot;, &amp;quot;CjTLN-FXiFA&amp;quot;) ``` to our .</description>
+      <description>&lt;p&gt;&lt;a href=&#34;https://gohugo.io/content-management/shortcodes/&#34;&gt;Shortcodes are simple snippets inside your content files calling built-in or custom templates.&lt;/a&gt; This short post is a shout-out for the &lt;code&gt;blogdown::shortcode()&lt;/code&gt; function. Example(s) of &lt;code&gt;blogdown::shortcode()&lt;/code&gt; can be found in &lt;a href=&#34;https://bookdown.org/yihui/blogdown/content.html#shortcode&#34;&gt;blogdown book&lt;/a&gt;. To learn more about shortcodes visit &lt;a href=&#34;https://gohugo.io/content-management/shortcodes/&#34; class=&#34;uri&#34;&gt;https://gohugo.io/content-management/shortcodes/&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Shortcodes make it super easy to embed content in blog posts. Lets say we have a video we want to embed in a post: &lt;a href=&#34;https://youtu.be/CjTLN-FXiFA&#34; class=&#34;uri&#34;&gt;https://youtu.be/CjTLN-FXiFA&lt;/a&gt;. By adding&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;```{r, eval=TRUE}
+blogdown::shortcode(&amp;quot;youtube&amp;quot;, &amp;quot;CjTLN-FXiFA&amp;quot;)
+```&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;to our &lt;code&gt;.Rmd&lt;/code&gt; file, we get: 
+&lt;div style=&#34;position: relative; padding-bottom: 56.25%; padding-top: 30px; height: 0; overflow: hidden;&#34;&gt;
+  &lt;iframe src=&#34;//www.youtube.com/embed/CjTLN-FXiFA&#34; style=&#34;position: absolute; top: 0; left: 0; width: 100%; height: 100%;&#34; allowfullscreen frameborder=&#34;0&#34; title=&#34;YouTube Video&#34;&gt;&lt;/iframe&gt;
+ &lt;/div&gt;
+&lt;/p&gt;
+&lt;div id=&#34;how-i-discovered-shortcodes&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;How I discovered shortcodes&lt;/h1&gt;
+&lt;p&gt;For some time I have had the routine of (scrolling twitter and) sending tweets holding information I see myself using to my e-mail. For example, I find &lt;span class=&#34;citation&#34;&gt;@rensa_co&lt;/span&gt;’s example of &lt;code&gt;dplyr::case_when()&lt;/code&gt; and &lt;code&gt;geom_text()&lt;/code&gt; to be quite useful:&lt;/p&gt;
+&lt;blockquote class=&#34;twitter-tweet&#34;&gt;&lt;p lang=&#34;en&#34; dir=&#34;ltr&#34;&gt;💡 dplyr::case_when goes really well with geom_text (or ggrepel) for when you want to programmatically label a few of the most interesting features in your &lt;a href=&#34;https://twitter.com/hashtag/rstats?src=hash&amp;amp;ref_src=twsrc%5Etfw&#34;&gt;#rstats&lt;/a&gt; plots! And the criteria can be as complex as you want 🎉 &lt;a href=&#34;https://t.co/0jUp1uarde&#34;&gt;pic.twitter.com/0jUp1uarde&lt;/a&gt;&lt;/p&gt;&amp;mdash; James Goldie (@rensa_co) &lt;a href=&#34;https://twitter.com/rensa_co/status/976340414016843776?ref_src=twsrc%5Etfw&#34;&gt;March 21, 2018&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async src=&#34;https://platform.twitter.com/widgets.js&#34; charset=&#34;utf-8&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;So I sent it to my (work or personal - I’m not sure which) e-mail with hopes to easily find it in the future. One can experience the pain of the e-mail system after first time really looking for something. One can quickly understand that there must exist a better way. As I was looking for a way to archive all these pearls, I was thinking about devoting a blog post to those tweets. I started by looking for a way to embed twitter cards to blog post written with &lt;code&gt;blogdown&lt;/code&gt;. I googeled “how to embed tweet in rmarkdown” which not surprisingly lead me to &lt;a href=&#34;https://stackoverflow.com/questions/46529953/how-to-include-arbitrary-html-in-rmarkdown-document&#34;&gt;stackoverflow&lt;/a&gt;. This question was answered by &lt;a href=&#34;https://yihui.name/&#34;&gt;Yihui&lt;/a&gt; and pointed to the &lt;a href=&#34;https://bookdown.org/yihui/blogdown/content.html&#34;&gt;blogdown documentation&lt;/a&gt; where I learned about &lt;code&gt;shortcode()&lt;/code&gt; function.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;fin&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;FIN&lt;/h1&gt;
+&lt;p&gt;After giving the blog post approach a second thought I realized that this is probably not gonna work. It seemed to be too much hassle to update the post manually or figure out how to automate the process. I ended up creating a &lt;em&gt;#rhtwotes&lt;/em&gt; (rh - my initials; twote&lt;a href=&#34;#fn1&#34; class=&#34;footnoteRef&#34; id=&#34;fnref1&#34;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/a&gt; - twitter note/quote) and the plan is to retweet things I see myself using with &lt;em&gt;#rhtwotes&lt;/em&gt; hashtag. This gives me easy access to my &lt;em&gt;twotes&lt;/em&gt; whenever I have internet connections and also simplifies (retweeting is easier than sending an e-mail) note taking part.&lt;/p&gt;
+&lt;p&gt;For now, using the hashtag system feels quite natural and optimal way to cover my use case. I also ask myself: “How could I use something not as simple as retweeting system before?”. As it often happens, &lt;em&gt;obvious&lt;/em&gt; solutions for our problems become &lt;em&gt;obvious&lt;/em&gt; only after we have tried many not so &lt;em&gt;obvious&lt;/em&gt; ones.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://twitter.com/hashtag/rhtwote&#34; target=&#34;_blank&#34;&gt;&lt;em&gt;#rhtwotes&lt;/em&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;!-- One extra thing I learned writing this post is how to add verbatim code chunks to posts written in rmarkown. Learn more from Yihui&#39;s  [blog](https://yihui.name/en/2017/11/knitr-verbatim-code-chunk/). --&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+&lt;hr /&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn1&#34;&gt;&lt;p&gt;I first had &lt;em&gt;tnotes&lt;/em&gt; for twitter notes in mind. Fortunately ML proposed &lt;em&gt;twote&lt;/em&gt; which has much better sounding. Word &lt;em&gt;twote&lt;/em&gt; seems to have wider usage as well: &lt;a href=&#34;https://www.urbandictionary.com/define.php?term=Twote&#34; class=&#34;uri&#34;&gt;https://www.urbandictionary.com/define.php?term=Twote&lt;/a&gt;&lt;a href=&#34;#fnref1&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
     </item>
     
   </channel>
