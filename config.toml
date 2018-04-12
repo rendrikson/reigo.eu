@@ -1,6 +1,6 @@
 baseurl = "/"
 title = "reigo.eu"
-author = "Nan Xiao"
+author = "Reigo Hendrikson"
 canonifyurls = true
 languagecode = "en"
 theme = "hugo-tanka"
@@ -32,3 +32,11 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
     name = "Twitter"
     url = "https://twitter.com/ReigoHendrikson"
     weight = 3
+[[menu.main]]
+    name = "R-bloggers"
+    url = "https://www.r-bloggers.com/"
+    weight = 4
+[[menu.main]]
+    name = "RSS"
+    url = "/index.xml"
+weight = 5
