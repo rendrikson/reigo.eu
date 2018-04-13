@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/2018/04/extending-dt-child-row-example/</loc>
+    <lastmod>2018-04-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/2018/04/shortcodes/</loc>
     <lastmod>2018-04-01T00:00:00+00:00</lastmod>
   </url>
@@ -30,6 +35,12 @@
   </url>
   
   <url>
+    <loc>/tags/dt/</loc>
+    <lastmod>2018-04-13T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/goodreads/</loc>
     <lastmod>2018-02-04T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -37,13 +48,13 @@
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2018-04-01T00:00:00+00:00</lastmod>
+    <lastmod>2018-04-13T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/r/</loc>
-    <lastmod>2018-04-01T00:00:00+00:00</lastmod>
+    <lastmod>2018-04-13T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -55,7 +66,7 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2018-04-01T00:00:00+00:00</lastmod>
+    <lastmod>2018-04-13T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

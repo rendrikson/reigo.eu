@@ -6,10 +6,134 @@
     <description>Recent content on reigo.eu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 01 Apr 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 13 Apr 2018 00:00:00 +0000</lastBuildDate>
     
         <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Extending DT child row example</title>
+      <link>/2018/04/extending-dt-child-row-example/</link>
+      <pubDate>Fri, 13 Apr 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/04/extending-dt-child-row-example/</guid>
+      <description>&lt;script src=&#34;/rmarkdown-libs/htmlwidgets/htmlwidgets.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;/rmarkdown-libs/jquery/jquery.min.js&#34;&gt;&lt;/script&gt;
+&lt;link href=&#34;/rmarkdown-libs/datatables-css/datatables-crosstalk.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;script src=&#34;/rmarkdown-libs/datatables-binding/datatables.js&#34;&gt;&lt;/script&gt;
+&lt;link href=&#34;/rmarkdown-libs/dt-core/css/jquery.dataTables.min.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;link href=&#34;/rmarkdown-libs/dt-core/css/jquery.dataTables.extra.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;script src=&#34;/rmarkdown-libs/dt-core/js/jquery.dataTables.min.js&#34;&gt;&lt;/script&gt;
+&lt;link href=&#34;/rmarkdown-libs/crosstalk/css/crosstalk.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;script src=&#34;/rmarkdown-libs/crosstalk/js/crosstalk.min.js&#34;&gt;&lt;/script&gt;
+
+
+&lt;p&gt;Short description of R package &lt;code&gt;DT&lt;/code&gt; from its &lt;a href=&#34;https://rstudio.github.io/DT/&#34;&gt;website&lt;/a&gt;:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The R package DT provides an R interface to the JavaScript library &lt;a href=&#34;(https://datatables.net/)&#34;&gt;DataTables&lt;/a&gt;. R data objects (matrices or data frames) can be displayed as tables on HTML pages, and DataTables provides filtering, pagination, sorting, and many other features in the tables.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;In practice it means that we can easily publish interactable HTML tables to our reports, dashboards, blog posts etc. To learn more about &lt;code&gt;DT&lt;/code&gt; visit &lt;a href=&#34;https://rstudio.github.io/DT/&#34; class=&#34;uri&#34;&gt;https://rstudio.github.io/DT/&lt;/a&gt;. As you can imagine, there is lot of stuff you can do with your &lt;code&gt;datatable&lt;/code&gt;, so even if you have used &lt;code&gt;datatable()&lt;/code&gt; function for a while, &lt;strong&gt;I’ll highly recommend to take a look to the &lt;a href=&#34;https://rstudio.github.io/DT/&#34;&gt;DT website&lt;/a&gt;&lt;/strong&gt;. I found it to be full of useful examples.&lt;/p&gt;
+&lt;div id=&#34;child-rows&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Child Rows&lt;/h1&gt;
+&lt;p&gt;There is &lt;a href=&#34;https://rstudio.github.io/DT/002-rowdetails.html&#34;&gt;an example&lt;/a&gt; of &lt;code&gt;datatable&lt;/code&gt; with child rows published in &lt;code&gt;DT&lt;/code&gt; website. The example, in turn, is adapted from DataTables &lt;a href=&#34;https://datatables.net/examples/api/row_details.html&#34;&gt;website&lt;/a&gt;. In this post I will extend &lt;code&gt;DT&lt;/code&gt; &lt;a href=&#34;https://rstudio.github.io/DT/002-rowdetails.html&#34;&gt;child rows example&lt;/a&gt; such that it will look more similar to the original. I start by downloading example data from &lt;a href=&#34;https://datatables.net/extensions/buttons/examples/initialisation/export.html&#34;&gt;DataTables&lt;/a&gt; website and save it as &lt;code&gt;dt-export-ex.csv&lt;/code&gt;. Next I will load necessary packages, read data to R and add &lt;code&gt;Employee ID&lt;/code&gt; variable to data.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tidyverse)
+library(DT)
+x &amp;lt;- readr::read_csv(&amp;quot;dt-export-ex.csv&amp;quot;)
+x[[&amp;quot;Employee ID&amp;quot;]] &amp;lt;- round(runif(nrow(x)) * 10000)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I use &lt;a href=&#34;#datatable2&#34;&gt;&lt;code&gt;datatable2()&lt;/code&gt;&lt;/a&gt; function (see full code &lt;a href=&#34;#datatable2&#34;&gt;below&lt;/a&gt;) to embed &lt;code&gt;datatable&lt;/code&gt; with child rows to this document:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;datatable2(
+  x = x, 
+  vars = c(&amp;quot;Employee ID&amp;quot;, &amp;quot;Age&amp;quot;, &amp;quot;Start date&amp;quot;),
+  opts = list(pageLength = 5)
+)&lt;/code&gt;&lt;/pre&gt;
+&lt;hr /&gt;
+&lt;div id=&#34;htmlwidget-1&#34; style=&#34;width:100%;height:auto;&#34; class=&#34;datatables html-widget&#34;&gt;&lt;/div&gt;
+&lt;script type=&#34;application/json&#34; data-for=&#34;htmlwidget-1&#34;&gt;{&#34;x&#34;:{&#34;filter&#34;:&#34;none&#34;,&#34;data&#34;:[[&#34;1&#34;,&#34;2&#34;,&#34;3&#34;,&#34;4&#34;,&#34;5&#34;,&#34;6&#34;,&#34;7&#34;,&#34;8&#34;,&#34;9&#34;,&#34;10&#34;,&#34;11&#34;,&#34;12&#34;,&#34;13&#34;,&#34;14&#34;,&#34;15&#34;,&#34;16&#34;,&#34;17&#34;,&#34;18&#34;,&#34;19&#34;,&#34;20&#34;,&#34;21&#34;,&#34;22&#34;,&#34;23&#34;,&#34;24&#34;,&#34;25&#34;,&#34;26&#34;,&#34;27&#34;,&#34;28&#34;,&#34;29&#34;,&#34;30&#34;,&#34;31&#34;,&#34;32&#34;,&#34;33&#34;,&#34;34&#34;,&#34;35&#34;,&#34;36&#34;,&#34;37&#34;,&#34;38&#34;,&#34;39&#34;,&#34;40&#34;,&#34;41&#34;,&#34;42&#34;,&#34;43&#34;,&#34;44&#34;,&#34;45&#34;,&#34;46&#34;,&#34;47&#34;,&#34;48&#34;,&#34;49&#34;,&#34;50&#34;,&#34;51&#34;,&#34;52&#34;,&#34;53&#34;,&#34;54&#34;,&#34;55&#34;,&#34;56&#34;,&#34;57&#34;],[&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;,&#34;&amp;oplus;&#34;],[&#34;Airi Satou&#34;,&#34;Angelica Ramos&#34;,&#34;Ashton Cox&#34;,&#34;Bradley Greer&#34;,&#34;Brenden Wagner&#34;,&#34;Brielle Williamson&#34;,&#34;Bruno Nash&#34;,&#34;Caesar Vance&#34;,&#34;Cara Stevens&#34;,&#34;Cedric Kelly&#34;,&#34;Charde Marshall&#34;,&#34;Colleen Hurst&#34;,&#34;Dai Rios&#34;,&#34;Donna Snider&#34;,&#34;Doris Wilder&#34;,&#34;Finn Camacho&#34;,&#34;Fiona Green&#34;,&#34;Garrett Winters&#34;,&#34;Gavin Cortez&#34;,&#34;Gavin Joyce&#34;,&#34;Gloria Little&#34;,&#34;Haley Kennedy&#34;,&#34;Hermione Butler&#34;,&#34;Herrod Chandler&#34;,&#34;Hope Fuentes&#34;,&#34;Howard Hatfield&#34;,&#34;Jackson Bradshaw&#34;,&#34;Jena Gaines&#34;,&#34;Jenette Caldwell&#34;,&#34;Jennifer Acosta&#34;,&#34;Jennifer Chang&#34;,&#34;Jonas Alexander&#34;,&#34;Lael Greer&#34;,&#34;Martena Mccray&#34;,&#34;Michael Bruce&#34;,&#34;Michael Silva&#34;,&#34;Michelle House&#34;,&#34;Olivia Liang&#34;,&#34;Paul Byrd&#34;,&#34;Prescott Bartlett&#34;,&#34;Quinn Flynn&#34;,&#34;Rhona Davidson&#34;,&#34;Sakura Yamamoto&#34;,&#34;Serge Baldwin&#34;,&#34;Shad Decker&#34;,&#34;Shou Itou&#34;,&#34;Sonya Frost&#34;,&#34;Suki Burks&#34;,&#34;Tatyana Fitzpatrick&#34;,&#34;Thor Walton&#34;,&#34;Tiger Nixon&#34;,&#34;Timothy Mooney&#34;,&#34;Unity Butler&#34;,&#34;Vivian Harrell&#34;,&#34;Yuri Berry&#34;,&#34;Zenaida Frank&#34;,&#34;Zorita Serrano&#34;],[&#34;Accountant&#34;,&#34;Chief Executive Officer (CEO)&#34;,&#34;Junior Technical Author&#34;,&#34;Software Engineer&#34;,&#34;Software Engineer&#34;,&#34;Integration Specialist&#34;,&#34;Software Engineer&#34;,&#34;Pre-Sales Support&#34;,&#34;Sales Assistant&#34;,&#34;Senior Javascript Developer&#34;,&#34;Regional Director&#34;,&#34;Javascript Developer&#34;,&#34;Personnel Lead&#34;,&#34;Customer Support&#34;,&#34;Sales Assistant&#34;,&#34;Support Engineer&#34;,&#34;Chief Operating Officer (COO)&#34;,&#34;Accountant&#34;,&#34;Team Leader&#34;,&#34;Developer&#34;,&#34;Systems Administrator&#34;,&#34;Senior Marketing Designer&#34;,&#34;Regional Director&#34;,&#34;Sales Assistant&#34;,&#34;Secretary&#34;,&#34;Office Manager&#34;,&#34;Director&#34;,&#34;Office Manager&#34;,&#34;Development Lead&#34;,&#34;Junior Javascript Developer&#34;,&#34;Regional Director&#34;,&#34;Developer&#34;,&#34;Systems Administrator&#34;,&#34;Post-Sales support&#34;,&#34;Javascript Developer&#34;,&#34;Marketing Designer&#34;,&#34;Integration Specialist&#34;,&#34;Support Engineer&#34;,&#34;Chief Financial Officer (CFO)&#34;,&#34;Technical Author&#34;,&#34;Support Lead&#34;,&#34;Integration Specialist&#34;,&#34;Support Engineer&#34;,&#34;Data Coordinator&#34;,&#34;Regional Director&#34;,&#34;Regional Marketing&#34;,&#34;Software Engineer&#34;,&#34;Developer&#34;,&#34;Regional Director&#34;,&#34;Developer&#34;,&#34;System Architect&#34;,&#34;Office Manager&#34;,&#34;Marketing Designer&#34;,&#34;Financial Controller&#34;,&#34;Chief Marketing Officer (CMO)&#34;,&#34;Software Engineer&#34;,&#34;Software Engineer&#34;],[&#34;Tokyo&#34;,&#34;London&#34;,&#34;San Francisco&#34;,&#34;London&#34;,&#34;San Francisco&#34;,&#34;New York&#34;,&#34;London&#34;,&#34;New York&#34;,&#34;New York&#34;,&#34;Edinburgh&#34;,&#34;San Francisco&#34;,&#34;San Francisco&#34;,&#34;Edinburgh&#34;,&#34;New York&#34;,&#34;Sidney&#34;,&#34;San Francisco&#34;,&#34;San Francisco&#34;,&#34;Tokyo&#34;,&#34;San Francisco&#34;,&#34;Edinburgh&#34;,&#34;New York&#34;,&#34;London&#34;,&#34;London&#34;,&#34;San Francisco&#34;,&#34;San Francisco&#34;,&#34;San Francisco&#34;,&#34;New York&#34;,&#34;London&#34;,&#34;New York&#34;,&#34;Edinburgh&#34;,&#34;Singapore&#34;,&#34;San Francisco&#34;,&#34;London&#34;,&#34;Edinburgh&#34;,&#34;Singapore&#34;,&#34;London&#34;,&#34;Sidney&#34;,&#34;Singapore&#34;,&#34;New York&#34;,&#34;London&#34;,&#34;Edinburgh&#34;,&#34;Tokyo&#34;,&#34;Tokyo&#34;,&#34;Singapore&#34;,&#34;Edinburgh&#34;,&#34;Tokyo&#34;,&#34;Edinburgh&#34;,&#34;London&#34;,&#34;London&#34;,&#34;New York&#34;,&#34;Edinburgh&#34;,&#34;London&#34;,&#34;San Francisco&#34;,&#34;San Francisco&#34;,&#34;New York&#34;,&#34;New York&#34;,&#34;San Francisco&#34;],[33,47,66,41,28,61,38,21,46,22,36,39,35,27,23,47,48,63,22,42,59,43,47,59,41,51,65,30,30,43,28,30,21,46,29,66,37,64,64,27,22,55,37,64,51,20,23,53,19,61,61,37,47,62,40,63,56],[&#34;2008-11-28&#34;,&#34;2009-10-09&#34;,&#34;2009-01-12&#34;,&#34;2012-10-13&#34;,&#34;2011-06-07&#34;,&#34;2012-12-02&#34;,&#34;2011-05-03&#34;,&#34;2011-12-12&#34;,&#34;2011-12-06&#34;,&#34;2012-03-29&#34;,&#34;2008-10-16&#34;,&#34;2009-09-15&#34;,&#34;2012-09-26&#34;,&#34;2011-01-25&#34;,&#34;2010-09-20&#34;,&#34;2009-07-07&#34;,&#34;2010-03-11&#34;,&#34;2011-07-25&#34;,&#34;2008-10-26&#34;,&#34;2010-12-22&#34;,&#34;2009-04-10&#34;,&#34;2012-12-18&#34;,&#34;2011-03-21&#34;,&#34;2012-08-06&#34;,&#34;2010-02-12&#34;,&#34;2008-12-16&#34;,&#34;2008-09-26&#34;,&#34;2008-12-19&#34;,&#34;2011-09-03&#34;,&#34;2013-02-01&#34;,&#34;2010-11-14&#34;,&#34;2010-07-14&#34;,&#34;2009-02-27&#34;,&#34;2011-03-09&#34;,&#34;2011-06-27&#34;,&#34;2012-11-27&#34;,&#34;2011-06-02&#34;,&#34;2011-02-03&#34;,&#34;2010-06-09&#34;,&#34;2011-05-07&#34;,&#34;2013-03-03&#34;,&#34;2010-10-14&#34;,&#34;2009-08-19&#34;,&#34;2012-04-09&#34;,&#34;2008-11-13&#34;,&#34;2011-08-14&#34;,&#34;2008-12-13&#34;,&#34;2009-10-22&#34;,&#34;2010-03-17&#34;,&#34;2013-08-11&#34;,&#34;2011-04-25&#34;,&#34;2008-12-11&#34;,&#34;2009-12-09&#34;,&#34;2009-02-14&#34;,&#34;2009-06-25&#34;,&#34;2010-01-04&#34;,&#34;2012-06-01&#34;],[&#34;$162,700&#34;,&#34;$1,200,000&#34;,&#34;$86,000&#34;,&#34;$132,000&#34;,&#34;$206,850&#34;,&#34;$372,000&#34;,&#34;$163,500&#34;,&#34;$106,450&#34;,&#34;$145,600&#34;,&#34;$433,060&#34;,&#34;$470,600&#34;,&#34;$205,500&#34;,&#34;$217,500&#34;,&#34;$112,000&#34;,&#34;$85,600&#34;,&#34;$87,500&#34;,&#34;$850,000&#34;,&#34;$170,750&#34;,&#34;$235,500&#34;,&#34;$92,575&#34;,&#34;$237,500&#34;,&#34;$313,500&#34;,&#34;$356,250&#34;,&#34;$137,500&#34;,&#34;$109,850&#34;,&#34;$164,500&#34;,&#34;$645,750&#34;,&#34;$90,560&#34;,&#34;$345,000&#34;,&#34;$75,650&#34;,&#34;$357,650&#34;,&#34;$86,500&#34;,&#34;$103,500&#34;,&#34;$324,050&#34;,&#34;$183,000&#34;,&#34;$198,500&#34;,&#34;$95,400&#34;,&#34;$234,500&#34;,&#34;$725,000&#34;,&#34;$145,000&#34;,&#34;$342,000&#34;,&#34;$327,900&#34;,&#34;$139,575&#34;,&#34;$138,575&#34;,&#34;$183,000&#34;,&#34;$163,000&#34;,&#34;$103,600&#34;,&#34;$114,500&#34;,&#34;$385,750&#34;,&#34;$98,540&#34;,&#34;$320,800&#34;,&#34;$136,200&#34;,&#34;$85,675&#34;,&#34;$452,500&#34;,&#34;$675,000&#34;,&#34;$125,250&#34;,&#34;$115,000&#34;],[5785,3148,6194,2391,2580,8609,8375,8783,1667,3327,2092,2489,3223,7574,1531,7365,3609,1720,9197,247,5231,3987,3903,4207,7783,5770,1329,106,1455,7263,2429,6694,2736,6506,1187,4484,63,8651,6570,8294,9043,6055,6431,7006,3743,5435,7368,5136,593,4603,5794,5205,4995,1083,6753,3025,8917]],&#34;container&#34;:&#34;&lt;table class=\&#34;display\&#34;&gt;\n  &lt;thead&gt;\n    &lt;tr&gt;\n      &lt;th&gt; &lt;\/th&gt;\n      &lt;th&gt; &lt;\/th&gt;\n      &lt;th&gt;Name&lt;\/th&gt;\n      &lt;th&gt;Position&lt;\/th&gt;\n      &lt;th&gt;Office&lt;\/th&gt;\n      &lt;th&gt;Age&lt;\/th&gt;\n      &lt;th&gt;Start date&lt;\/th&gt;\n      &lt;th&gt;Salary&lt;\/th&gt;\n      &lt;th&gt;Employee ID&lt;\/th&gt;\n    &lt;\/tr&gt;\n  &lt;\/thead&gt;\n&lt;\/table&gt;&#34;,&#34;options&#34;:{&#34;pageLength&#34;:5,&#34;columnDefs&#34;:[{&#34;visible&#34;:false,&#34;targets&#34;:[0,8,5,6]},{&#34;orderable&#34;:false,&#34;className&#34;:&#34;details-control&#34;,&#34;targets&#34;:1},{&#34;className&#34;:&#34;dt-left&#34;,&#34;targets&#34;:[1,2,3]},{&#34;className&#34;:&#34;dt-right&#34;,&#34;targets&#34;:[4,5,6,7,8]},{&#34;orderable&#34;:false,&#34;targets&#34;:0}],&#34;order&#34;:[],&#34;autoWidth&#34;:false,&#34;orderClasses&#34;:false,&#34;lengthMenu&#34;:[5,10,25,50,100]},&#34;callback&#34;:&#34;function(table) {\ntable.column(1).nodes().to$().css({cursor: &#39;pointer&#39;}); \n  var format = function(d) {\n    text = &#39;&lt;div&gt;&lt;table &gt;&#39; + \n    &#39;&lt;tr&gt;&#39; +\n  &#39;&lt;td&gt;&#39; + &#39;Employee ID:&#39; + &#39;&lt;\/td&gt;&#39; +\n  &#39;&lt;td&gt;&#39; + d[8] + &#39;&lt;\/td&gt;&#39; +\n&#39;&lt;\/tr&gt;&#39; +  &#39;&lt;tr&gt;&#39; +\n  &#39;&lt;td&gt;&#39; + &#39;Age:&#39; + &#39;&lt;\/td&gt;&#39; +\n  &#39;&lt;td&gt;&#39; + d[5] + &#39;&lt;\/td&gt;&#39; +\n&#39;&lt;\/tr&gt;&#39; +  &#39;&lt;tr&gt;&#39; +\n  &#39;&lt;td&gt;&#39; + &#39;Start date:&#39; + &#39;&lt;\/td&gt;&#39; +\n  &#39;&lt;td&gt;&#39; + d[6] + &#39;&lt;\/td&gt;&#39; +\n&#39;&lt;\/tr&gt;&#39; + &#39;&lt;\/table&gt;&lt;\/div&gt;&#39;\n      return text;}; \n   table.on(&#39;click&#39;, &#39;td.details-control&#39;, function() {\n    var td = $(this), row = table.row(td.closest(&#39;tr&#39;));\n    if (row.child.isShown()) {\n      row.child.hide();\n      td.html(&#39;&amp;oplus;&#39;);\n    } else {\n      row.child(format(row.data())).show();\n      td.html(&#39;&amp;ominus;&#39;);\n    }\n  });\n}&#34;},&#34;evals&#34;:[&#34;callback&#34;],&#34;jsHooks&#34;:[]}&lt;/script&gt;
+&lt;p&gt;When clicking on the + sign we can see additional information about any given row. I think that &lt;code&gt;datatable&lt;/code&gt; produced with &lt;code&gt;databale2()&lt;/code&gt; function looks quite similar to &lt;a href=&#34;https://datatables.net/examples/api/row_details.html&#34;&gt;original example&lt;/a&gt;. Also, the benefit of making a function out of it allows us to specify other options available for &lt;code&gt;DT::datatable()&lt;/code&gt; functions, which hopefully makes &lt;code&gt;datatable2()&lt;/code&gt; to fit better in my (or yours) workflow.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;datatable2&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;FUNS&lt;/h1&gt;
+&lt;p&gt;Code for &lt;code&gt;datatable2()&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# datatable2 - datatable with child rows
+datatable2 &amp;lt;- function(x, vars = NULL, opts = NULL, ...) {
+  
+  names_x &amp;lt;- names(x)
+  if (is.null(vars)) stop(&amp;quot;&amp;#39;vars&amp;#39; must be specified!&amp;quot;)
+  pos &amp;lt;- match(vars, names_x)
+  if (any(map_chr(x[, pos], typeof) == &amp;quot;list&amp;quot;))
+    stop(&amp;quot;list columns are not supported in datatable2()&amp;quot;)
+  
+  pos &amp;lt;- pos[pos &amp;lt;= ncol(x)] + 1
+  rownames(x) &amp;lt;- NULL
+  if (nrow(x) &amp;gt; 0) x &amp;lt;- cbind(&amp;#39; &amp;#39; = &amp;#39;&amp;amp;oplus;&amp;#39;, x)
+
+  # options
+  opts &amp;lt;- c(
+    opts, 
+    list(
+      columnDefs = list(
+        list(visible = FALSE, targets = c(0, pos)),
+        list(orderable = FALSE, className = &amp;#39;details-control&amp;#39;, targets = 1),
+        list(className = &amp;#39;dt-left&amp;#39;, targets = 1:3),
+        list(className = &amp;#39;dt-right&amp;#39;, targets = 4:ncol(x))
+      )
+  ))
+  
+  datatable(
+    x, 
+    ...,
+    escape = -2,
+    options = opts,
+    callback = JS(.callback2(x = x, pos = c(0, pos)))
+  )
+}
+
+.callback2 &amp;lt;- function(x, pos = NULL) {
+  
+  part1 &amp;lt;- &amp;quot;table.column(1).nodes().to$().css({cursor: &amp;#39;pointer&amp;#39;});&amp;quot;
+  
+  part2 &amp;lt;- .child_row_table2(x, pos = pos)
+  
+  part3 &amp;lt;- 
+  &amp;quot;
+   table.on(&amp;#39;click&amp;#39;, &amp;#39;td.details-control&amp;#39;, function() {
+    var td = $(this), row = table.row(td.closest(&amp;#39;tr&amp;#39;));
+    if (row.child.isShown()) {
+      row.child.hide();
+      td.html(&amp;#39;&amp;amp;oplus;&amp;#39;);
+    } else {
+      row.child(format(row.data())).show();
+      td.html(&amp;#39;&amp;amp;ominus;&amp;#39;);
+    }
+  });&amp;quot;
+  
+  paste(part1, part2, part3)
+} 
+
+.child_row_table2 &amp;lt;- function(x, pos = NULL) {
+  
+  names_x &amp;lt;- paste0(names(x), &amp;quot;:&amp;quot;)
+  text &amp;lt;- &amp;quot;
+  var format = function(d) {
+    text = &amp;#39;&amp;lt;div&amp;gt;&amp;lt;table &amp;gt;&amp;#39; + 
+  &amp;quot;
+
+  for (i in seq_along(pos)) {
+    text &amp;lt;- paste(text, glue::glue(
+        &amp;quot;&amp;#39;&amp;lt;tr&amp;gt;&amp;#39; +
+          &amp;#39;&amp;lt;td&amp;gt;&amp;#39; + &amp;#39;{names_x[pos[i]]}&amp;#39; + &amp;#39;&amp;lt;/td&amp;gt;&amp;#39; +
+          &amp;#39;&amp;lt;td&amp;gt;&amp;#39; + d[{pos[i]}] + &amp;#39;&amp;lt;/td&amp;gt;&amp;#39; +
+        &amp;#39;&amp;lt;/tr&amp;gt;&amp;#39; + &amp;quot; ))
+  }
+
+  paste0(text,
+    &amp;quot;&amp;#39;&amp;lt;/table&amp;gt;&amp;lt;/div&amp;gt;&amp;#39;
+      return text;};&amp;quot;
+  )
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+</description>
+    </item>
     
     <item>
       <title>Use shortcodes to embed tweets, videos, etc. in your blogdown blog posts</title>
