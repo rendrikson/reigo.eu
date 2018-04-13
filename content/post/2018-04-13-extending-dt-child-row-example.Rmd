@@ -1,5 +1,5 @@
 ---
-title: Extending DT child row example
+title: Extending DT child rows example
 author: ''
 date: '2018-04-13'
 slug: extending-dt-child-row-example
