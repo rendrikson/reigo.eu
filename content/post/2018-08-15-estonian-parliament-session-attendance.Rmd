@@ -1,0 +1,268 @@
+---
+title: Estonian Parliament Session Attendance
+author: ''
+date: '2018-08-15'
+slug: estonian-parliament-session-attendance
+categories: []
+tags:
+  - R
+  - estonia
+---
+
+Description of the Parliament of Estonia from its [website](https://www.riigikogu.ee/en/): 
+
+> The Riigikogu is the parliament of Estonia. Its 101 members are elected at general elections for a term of four years. The Riigikogu passes laws and resolutions, exercises parliamentary supervision and ratifies international agreements.
+
+Parliament of Estonia has regular meetings. In this post we look how to get session attendance data from  [Estonian Goverment Office API](https://aavik.riigikogu.ee/)[^1] and visualize XIII Riigikogu absence from these sessions. [R](https://en.wikipedia.org/wiki/R_(programming_language)) will be used to get and analyze data.
+
+_Special thanks to Estonian Goverment Office eployees who answered my queries and showed me how to access the data I was interested in. Double thanks for reacting so quickly to fix a problem I was having!_
+
+If you are not interested getting into the R stuff, feel free to jump to [results](#results).
+
+
+# Data
+
+We use `jsonlite` package to download parliament votings data. Required fields to access votings data are `startDate` and `endDate` (see [/api/votings](https://aavik.riigikogu.ee/swagger-ui.html#/H%C3%A4%C3%A4letused/getVotingsUsingGET)). Session attendance votings are marked as type `Kohaloleku kontroll` (attendance control). Lets download all votings between `1990-01-01` and `2018-09-01`:
+
+```{r eval=FALSE}
+library(tidyverse)
+library(jsonlite)
+url <- "https://aavik.riigikogu.ee/api/votings?startDate=1990-01-01&endDate=2018-09-01&lang=et"
+votings <- fromJSON(url) %>% as_data_frame() 
+head(votings)
+```
+
+```{r eval=TRUE, echo=FALSE, message=FALSE}
+library(tidyverse)
+library(jsonlite)
+hd <- function(x, ...) head(x, ...)
+
+url <- "https://aavik.riigikogu.ee/api/votings?startDate=1990-01-01&endDate=2018-09-01&lang=et"
+votings <- readRDS("/home/reigo/blog/riigikogu/data/votings.rds")
+head(votings)
+```
+
+Voting type information lies in `votings` list-column. Using `str()` we see that votings `data.frame` also as some list-columns. Since these list-columns are not necessary for us, lets remove them to have nice `data.frame` structure.
+
+```{r}
+str(votings$votings[[1]])
+```
+
+```{r}
+votings <- votings %>%
+  mutate(votings = map(votings, function(x) {
+    x[, map_chr(x, typeof) != "list"]
+  })) %>%
+  unnest(votings)
+head(votings)
+```
+
+Voting type information is in column `description`
+
+```{r}
+votings %>% 
+  count(description) %>% 
+  arrange(-n) %>% 
+  head()
+```
+
+For getting detailed votings information we use `get_votings()` function. In process of getting detailed votings information we also save all votings data so that we can easily use it later. 
+
+```{r, eval=FALSE}
+get_voting <- function(uuid = NULL) {
+  
+  # uuid: voting id
+  # one voting is saved once
+  # expects to have data/voting-details folder in your working directory
+  
+  files <- dir("data/voting-details/") # detailed votings local directory
+  if (paste0(uuid, ".rds") %in% files) 
+    y <- readRDS(paste0("data/voting-details/", uuid, ".rds"))
+  else {
+    url <- glue::glue("https://aavik.riigikogu.ee/api/votings/{uuid}?lang=et")
+    Sys.sleep(5) + runif(1, max = 2)
+    y <- tryCatch({
+      x <- jsonlite::fromJSON(url)
+      x
+    }, error = function(y) NULL)
+    if (!is.null(y)) saveRDS(y, paste0("data/voting-details/", uuid, ".rds"))
+    else print(y) 
+  }
+  y
+}
+
+ids <- votings$uuid1[votings$description == "Kohaloleku kontroll"]
+map(ids, get_voting)
+```
+
+After getting and saving all necessary attendance check data, we use `var_faction()` and `var_decision()` functions and some mutating to make `attendance` data more accessible:
+
+```{r, echo=FALSE}
+var_faction <- function(x) {
+  faction <- x$faction$name
+  x$faction <- faction
+  x
+}
+
+var_decision <- function(x) {
+  decision <- x$decision$value
+  x$decision <- decision
+  x
+}
+
+files <- dir("/home/reigo/blog/riigikogu/data/voting-details/", full.names = T)
+attendance <- readRDS("/home/reigo/blog/riigikogu/tidy-votings.rds")
+
+```
+
+```{r, eval=FALSE}
+var_faction <- function(x) {
+  faction <- x$faction$name
+  x$faction <- faction
+  x
+}
+
+var_decision <- function(x) {
+  decision <- x$decision$value
+  x$decision <- decision
+  x
+}
+
+files <- dir("data/voting-details/", full.names = T)
+attendance <- map_df(files, function(f) {
+  x <- readRDS(f)
+  x$voters %>% select(-`_links`, -lastName, -firstName) %>%
+    var_faction() %>%
+    var_decision() %>% as_data_frame() %>%
+    mutate(
+      votingNumber = x$votingNumber,
+      startDatetime = lubridate::as_datetime(x$startDateTime)
+    )
+}) %>%
+  left_join(votings %>% select(uuid = uuid1, description), by = "uuid") %>%
+  filter(description == "Kohaloleku kontroll")
+
+head(attendance)
+```
+
+```{r, echo=FALSE}
+head(attendance)
+```
+
+By now we have all necessary data. Decision values `kohal` and `poolt` mean that parliament member attended meeting. `puudub` means that member did not attend the meeting. 
+
+# Helpers
+
+We use following helper functions to make data munging and plotting easier:
+
+```{r fns, echo=TRUE}
+
+dat_attendace_roll_mean <- function(x = NULL, n = 1, from = "1970-01-01", 
+                                    to = Sys.Date()) {
+  
+  # member has to be present (attend) at least in 1 attendence check to be 
+  # counted as present for the day
+  # 
+  # x: attendance data
+  # n: nr of attendance check over mean is calculated
+  
+  from <- as.Date(from)
+  to <- as.Date(to)
+  
+  x %>% 
+    mutate(date = lubridate::date(startDatetime)) %>% 
+    filter(date >= from & date <= to) %>%
+    count(date, fullName, decision) %>%
+    group_by(date) %>%
+    summarise(
+      n_present = sum(decision %in% c("kohal", "poolt")),
+      n_total = n_distinct(fullName)
+    ) %>% ungroup() %>% 
+    mutate(p_present = n_present / n_total) %>% 
+    mutate(
+      p_roll_mean = RcppRoll::roll_sumr(n_present, n = n, na.rm = T) / 
+        RcppRoll::roll_sumr(n_total, n = n, na.rm = T)
+    ) %>% ungroup() 
+}
+
+plot_attendance_roll_mean <- function(x = NULL, n = 1, from = "1970-01-01", 
+                                      to = Sys.Date()) {
+  
+  # plotting function for making results part easier to read
+  # 
+  # x: attendance data
+  # n: nr of attendance check over mean is calculated
+ 
+  gg_data1 <- dat_attendace_roll_mean(x = x, n = n, from = from, to = to)
+  # first and last point
+  first <- gg_data1 %>% filter(!is.na(p_roll_mean)) %>% filter(date == min(date))
+  last  <- gg_data1 %>% filter(!is.na(p_roll_mean)) %>% filter(date == max(date))
+
+  
+  gg_data1 %>% 
+    ggplot(aes(date, 1 - p_roll_mean)) + 
+    geom_line() +
+    geom_point(data = first, color = "white", size = 2) + 
+    geom_point(data = last, color = "white", size = 2) + 
+    hrbrthemes::theme_modern_rc(grid = "Y", plot_title_size = 14,
+                            subtitle_size = 11, 
+                            plot_margin = ggplot2::margin(30, 30, 10, 30)) +
+    scale_y_continuous(labels = function(x) scales::percent(x, 1), 
+                       limits = c(.12, .22), 
+                       breaks = seq(.12, .24, .03)) +
+    labs(x = NULL, y = NULL, 
+         title = "Absence from XIII Riigikogu sessions has increased",
+         subtitle = glue::glue("{n} meeting days rolling average absence"),
+         caption = "\nSource: https://aavik.riigikogu.ee/api/votings/ \n \nTheme: modern_rc from {hrbrthemes}") +
+    scale_color_manual(values = col_faction()) + 
+    theme(
+      legend.title = element_blank(),
+      text = element_text(family = "Helvetica")
+    ) + 
+    geom_vline(xintercept = as.Date(c("2015-03-30", "2016-11-23", "2017-09-10")), 
+               lty = 2, alpha = .5, color = "#8e8e93") + 
+    annotate("text", label = "new goverment\ntook the oath", 
+                  x = as.Date("2016-11-23") - 20, y = .195, size = 3, hjust = 1) + 
+    annotate("text", label = "end of 2017 \nsummer break", 
+                  x = as.Date("2017-09-10") + 20, y = .135, size = 3, hjust = 0) + 
+    annotate("text", label = "2015-03-30 \nXIII Riigikogu \nfirst session", 
+                  x = as.Date("2015-03-30") + 20, y = .165, size = 3, hjust = 0) + 
+    annotate("text", label = scales::percent(1 - first$p_roll_mean),
+             x = first$date - 70, y = .134, size = 3.5, color = "white") + 
+    annotate("text", label = scales::percent(1 - last$p_roll_mean),
+             x = last$date + 70, y = .215, size = 3.5, color = "white") + 
+    scale_x_date(limits = as.Date(c("2015-01-01", "2018-10-01")))
+     
+}  
+```
+
+
+# Results {#results}
+
+Reading forward, keep in mind that **the attendance check information only shows who were present or absent at the moment of attendance check and not during the whole day of the sitting.** In the following, member is considered absent, if (s)he has missed all attendance checks of the day. 
+
+[XIII Riigikogu](https://en.wikipedia.org/wiki/Estonian_parliamentary_election,_2015) election was held in 1. March 2015. First XIII Riigikogu session took place in 30. March 2015. Six factions gained enough votes to get seats in Riigikogu. Following plot gives a glimpse of XIII Riigikogu sessions absence/attendance. 
+
+`plot_attendance_roll_mean(x = attendance, n = 90, from = "2015-03-30")`
+
+```{r, warning=FALSE, fig.height=4.3, echo=FALSE}
+plot_attendance_roll_mean(x = attendance, n = 90, from = "2015-03-30")
+```
+
+
+**Notes: **
+
+1. Member is considered absent for a day, if (s)he has missed all attendance checks of the day.  
+2. 90 meeting days rolling average absence is calculated by summing all absences from those 90 days (e.g, day one - 15 members were absent, day two - 8 members were absent) divided by total votes (since Estonian parliament has 101 members, it would be 90 x 101).
+3. XIII Riigikogu 90th meeting day was `2016-01-21` which makes it the first day the 90 days rolling average is calculated. As of writing, last data point is from ``r max(as.Date(attendance$startDatetime))``.  
+4. [`2016-11-23` Jüri Ratas' cabinet took the oath](https://en.wikipedia.org/wiki/J%C3%BCri_Ratas%27_cabinet). It was preceded by the Second Cabinet of Taavi Rõivas (from 9 April 2015 – 22 November 2016 [^3]), a cabinet that ended when Social Democrats and the Union of Pro Patria and Res Publica joined the opposition's no confidence vote against the cabinet. [^2]  
+
+# FIN
+
+In this post we saw how to download Estonian parliament session attendance data using [Government Office API](https://aavik.riigikogu.ee/). One can use same methodology to get other votings data. There is obviously many  (and more) interesting topics one can look into using data from the API. Since this post main focus was getting first feeling of the API and data, we leave further analysis for another posts. 
+
+If you happen to use the API or have any question, please leave a comment. I am curious of your take on the data! :)
+
+[^1]: As of writing this post the API is in demo/test phase.
+[^2]: https://en.wikipedia.org/wiki/J%C3%BCri_Ratas%27_cabinet
+[^3]: https://en.wikipedia.org/wiki/Government_of_Estonia

@@ -1,0 +1,375 @@
+<link rel="stylesheet" href="/css/agate.css" rel="stylesheet" id="theme-stylesheet">
+<script src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  
+
+  <link rel="icon" type="image/png" href="/favicon.png">
+
+  <title>
+    
+    
+     Estonian Parliament Session Attendance 
+    
+  </title>
+  <link rel="canonical" href="/2018/08/estonian-parliament-session-attendance/">
+
+  <link rel="stylesheet" href="/css/fonts.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+
+  
+</head>
+
+<body>
+<section id=nav>
+  <h1><a href="/">reigo.eu</a></h1>
+  <ul>
+    
+    <li><a href="/">Home</a></li>
+    
+    <li><a href="https://twitter.com/ReigoHendrikson">Twitter</a></li>
+    
+    <li><a href="https://rweekly.org">RWeekly</a></li>
+    
+    <li><a href="https://www.r-bloggers.com/">R-bloggers</a></li>
+    
+    <li><a href="/index.xml">RSS</a></li>
+    
+  </ul>
+</section>
+
+
+<section id=content>
+  <h1> Estonian Parliament Session Attendance </h1>
+
+  <div id=sub-header>
+     · 2018/08/15 · 9 minute read
+  </div>
+
+  <div class="entry-content">
+    <p>Description of the Parliament of Estonia from its <a href="https://www.riigikogu.ee/en/">website</a>:</p>
+<blockquote>
+<p>The Riigikogu is the parliament of Estonia. Its 101 members are elected at general elections for a term of four years. The Riigikogu passes laws and resolutions, exercises parliamentary supervision and ratifies international agreements.</p>
+</blockquote>
+<p>Parliament of Estonia has regular meetings. In this post we look how to get session attendance data from <a href="https://aavik.riigikogu.ee/">Estonian Goverment Office API</a><a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> and visualize XIII Riigikogu absence from these sessions. <a href="https://en.wikipedia.org/wiki/R_(programming_language)">R</a> will be used to get and analyze data.</p>
+<p><em>Special thanks to Estonian Goverment Office eployees who answered my queries and showed me how to access the data I was interested in. Double thanks for reacting so quickly to fix a problem I was having!</em></p>
+<p>If you are not interested getting into the R stuff, feel free to jump to <a href="#results">results</a>.</p>
+<div id="data" class="section level1">
+<h1>Data</h1>
+<p>We use <code>jsonlite</code> package to download parliament votings data. Required fields to access votings data are <code>startDate</code> and <code>endDate</code> (see <a href="https://aavik.riigikogu.ee/swagger-ui.html#/H%C3%A4%C3%A4letused/getVotingsUsingGET">/api/votings</a>). Session attendance votings are marked as type <code>Kohaloleku kontroll</code> (attendance control). Lets download all votings between <code>1990-01-01</code> and <code>2018-09-01</code>:</p>
+<pre class="r"><code>library(tidyverse)
+library(jsonlite)
+url &lt;- &quot;https://aavik.riigikogu.ee/api/votings?startDate=1990-01-01&amp;endDate=2018-09-01&amp;lang=et&quot;
+votings &lt;- fromJSON(url) %&gt;% as_data_frame() 
+head(votings)</code></pre>
+<pre><code>## # A tibble: 6 x 5
+##   uuid           title             membership sittingDateTime  votings    
+##   &lt;chr&gt;          &lt;chr&gt;                  &lt;int&gt; &lt;chr&gt;            &lt;list&gt;     
+## 1 04be4e82-f266… Täiskogu korrali…          8 1998-01-22T00:0… &lt;data.fram…
+## 2 6176a8ae-89ac… Täiskogu korrali…          8 1998-01-29T00:0… &lt;data.fram…
+## 3 bcb34b03-a842… Täiskogu korrali…          8 1998-02-09T00:0… &lt;data.fram…
+## 4 cd42db50-d8b7… Täiskogu korrali…          8 1998-02-11T00:0… &lt;data.fram…
+## 5 e289a577-8c64… Täiskogu korrali…          8 1998-02-18T00:0… &lt;data.fram…
+## 6 1ea1246f-056f… Täiskogu korrali…          8 1998-02-25T00:0… &lt;data.fram…</code></pre>
+<p>Voting type information lies in <code>votings</code> list-column. Using <code>str()</code> we see that votings <code>data.frame</code> also as some list-columns. Since these list-columns are not necessary for us, lets remove them to have nice <code>data.frame</code> structure.</p>
+<pre class="r"><code>str(votings$votings[[1]])</code></pre>
+<pre><code>## &#39;data.frame&#39;:    1 obs. of  15 variables:
+##  $ uuid           : chr &quot;c80bec7e-58cb-347e-ba2b-6511cf1b9b8d&quot;
+##  $ votingNumber   : int 1
+##  $ type           :&#39;data.frame&#39;: 1 obs. of  2 variables:
+##   ..$ code : chr &quot;AVALIK&quot;
+##   ..$ value: chr &quot;Avalik&quot;
+##  $ description    : logi NA
+##  $ startDateTime  : chr &quot;1998-01-22T10:42:00&quot;
+##  $ endDateTime    : logi NA
+##  $ present        : int 75
+##  $ absent         : int 26
+##  $ inFavor        : int 66
+##  $ against        : int 3
+##  $ neutral        : int 6
+##  $ abstained      : int 26
+##  $ relatedDraft   : logi NA
+##  $ relatedDocument: logi NA
+##  $ _links         :&#39;data.frame&#39;: 1 obs. of  1 variable:
+##   ..$ self:&#39;data.frame&#39;: 1 obs. of  1 variable:
+##   .. ..$ href: chr &quot;http://aavik.riigikogu.ee/api/votings/c80bec7e-58cb-347e-ba2b-6511cf1b9b8d&quot;</code></pre>
+<pre class="r"><code>votings &lt;- votings %&gt;%
+  mutate(votings = map(votings, function(x) {
+    x[, map_chr(x, typeof) != &quot;list&quot;]
+  })) %&gt;%
+  unnest(votings)
+head(votings)</code></pre>
+<pre><code>## # A tibble: 6 x 17
+##   uuid  title membership sittingDateTime uuid1 votingNumber description
+##   &lt;chr&gt; &lt;chr&gt;      &lt;int&gt; &lt;chr&gt;           &lt;chr&gt;        &lt;int&gt; &lt;chr&gt;      
+## 1 04be… Täis…          8 1998-01-22T00:… c80b…            1 &lt;NA&gt;       
+## 2 6176… Täis…          8 1998-01-29T00:… 43cc…            3 1. parandus
+## 3 6176… Täis…          8 1998-01-29T00:… 2b57…            2 660        
+## 4 6176… Täis…          8 1998-01-29T00:… d729…            4 2. parandus
+## 5 6176… Täis…          8 1998-01-29T00:… fb1e…            1 1. parandus
+## 6 bcb3… Täis…          8 1998-02-09T00:… 2136…            1 Päevakorra…
+## # ... with 10 more variables: startDateTime &lt;chr&gt;, endDateTime &lt;chr&gt;,
+## #   present &lt;int&gt;, absent &lt;int&gt;, inFavor &lt;int&gt;, against &lt;int&gt;,
+## #   neutral &lt;int&gt;, abstained &lt;int&gt;, relatedDraft &lt;lgl&gt;,
+## #   relatedDocument &lt;lgl&gt;</code></pre>
+<p>Voting type information is in column <code>description</code></p>
+<pre class="r"><code>votings %&gt;% 
+  count(description) %&gt;% 
+  arrange(-n) %&gt;% 
+  head()</code></pre>
+<pre><code>## # A tibble: 6 x 2
+##   description                   n
+##   &lt;chr&gt;                     &lt;int&gt;
+## 1 Lõpphääletus               3245
+## 2 Kohaloleku kontroll        3150
+## 3 Päevakorra kinnitamine      573
+## 4 Lükata tagasi               427
+## 5 Läbirääkimiste lôpetamine   376
+## 6 1. parandus                 355</code></pre>
+<p>For getting detailed votings information we use <code>get_votings()</code> function. In process of getting detailed votings information we also save all votings data so that we can easily use it later.</p>
+<pre class="r"><code>get_voting &lt;- function(uuid = NULL) {
+  
+  # uuid: voting id
+  # one voting is saved once
+  # expects to have data/voting-details folder in your working directory
+  
+  files &lt;- dir(&quot;data/voting-details/&quot;) # detailed votings local directory
+  if (paste0(uuid, &quot;.rds&quot;) %in% files) 
+    y &lt;- readRDS(paste0(&quot;data/voting-details/&quot;, uuid, &quot;.rds&quot;))
+  else {
+    url &lt;- glue::glue(&quot;https://aavik.riigikogu.ee/api/votings/{uuid}?lang=et&quot;)
+    Sys.sleep(5) + runif(1, max = 2)
+    y &lt;- tryCatch({
+      x &lt;- jsonlite::fromJSON(url)
+      x
+    }, error = function(y) NULL)
+    if (!is.null(y)) saveRDS(y, paste0(&quot;data/voting-details/&quot;, uuid, &quot;.rds&quot;))
+    else print(y) 
+  }
+  y
+}
+
+ids &lt;- votings$uuid1[votings$description == &quot;Kohaloleku kontroll&quot;]
+map(ids, get_voting)</code></pre>
+<p>After getting and saving all necessary attendance check data, we use <code>var_faction()</code> and <code>var_decision()</code> functions and some mutating to make <code>attendance</code> data more accessible:</p>
+<pre class="r"><code>var_faction &lt;- function(x) {
+  faction &lt;- x$faction$name
+  x$faction &lt;- faction
+  x
+}
+
+var_decision &lt;- function(x) {
+  decision &lt;- x$decision$value
+  x$decision &lt;- decision
+  x
+}
+
+files &lt;- dir(&quot;data/voting-details/&quot;, full.names = T)
+attendance &lt;- map_df(files, function(f) {
+  x &lt;- readRDS(f)
+  x$voters %&gt;% select(-`_links`, -lastName, -firstName) %&gt;%
+    var_faction() %&gt;%
+    var_decision() %&gt;% as_data_frame() %&gt;%
+    mutate(
+      votingNumber = x$votingNumber,
+      startDatetime = lubridate::as_datetime(x$startDateTime)
+    )
+}) %&gt;%
+  left_join(votings %&gt;% select(uuid = uuid1, description), by = &quot;uuid&quot;) %&gt;%
+  filter(description == &quot;Kohaloleku kontroll&quot;)
+
+head(attendance)</code></pre>
+<pre><code>## # A tibble: 6 x 6
+##   fullName   active faction      decision votingNumber startDatetime      
+##   &lt;chr&gt;      &lt;lgl&gt;  &lt;chr&gt;        &lt;chr&gt;           &lt;int&gt; &lt;dttm&gt;             
+## 1 Rein Aidma FALSE  Eesti Refor… kohal            6518 2007-05-16 14:05:51
+## 2 Jaak Aab   FALSE  &lt;NA&gt;         kohal            6518 2007-05-16 14:05:51
+## 3 Peep Aru   TRUE   Eesti Refor… kohal            6518 2007-05-16 14:05:51
+## 4 Hannes As… FALSE  &lt;NA&gt;         kohal            6518 2007-05-16 14:05:51
+## 5 Meelis At… FALSE  &lt;NA&gt;         kohal            6518 2007-05-16 14:05:51
+## 6 Ivi Eenmaa FALSE  &lt;NA&gt;         kohal            6518 2007-05-16 14:05:51</code></pre>
+<p>By now we have all necessary data. Decision values <code>kohal</code> and <code>poolt</code> mean that parliament member attended meeting. <code>puudub</code> means that member did not attend the meeting.</p>
+</div>
+<div id="helpers" class="section level1">
+<h1>Helpers</h1>
+<p>We use following helper functions to make data munging and plotting easier:</p>
+<pre class="r"><code>dat_attendace_roll_mean &lt;- function(x = NULL, n = 1, from = &quot;1970-01-01&quot;, 
+                                    to = Sys.Date()) {
+  
+  # member has to be present (attend) at least in 1 attendence check to be 
+  # counted as present for the day
+  # 
+  # x: attendance data
+  # n: nr of attendance check over mean is calculated
+  
+  from &lt;- as.Date(from)
+  to &lt;- as.Date(to)
+  
+  x %&gt;% 
+    mutate(date = lubridate::date(startDatetime)) %&gt;% 
+    filter(date &gt;= from &amp; date &lt;= to) %&gt;%
+    count(date, fullName, decision) %&gt;%
+    group_by(date) %&gt;%
+    summarise(
+      n_present = sum(decision %in% c(&quot;kohal&quot;, &quot;poolt&quot;)),
+      n_total = n_distinct(fullName)
+    ) %&gt;% ungroup() %&gt;% 
+    mutate(p_present = n_present / n_total) %&gt;% 
+    mutate(
+      p_roll_mean = RcppRoll::roll_sumr(n_present, n = n, na.rm = T) / 
+        RcppRoll::roll_sumr(n_total, n = n, na.rm = T)
+    ) %&gt;% ungroup() 
+}
+
+plot_attendance_roll_mean &lt;- function(x = NULL, n = 1, from = &quot;1970-01-01&quot;, 
+                                      to = Sys.Date()) {
+  
+  # plotting function for making results part easier to read
+  # 
+  # x: attendance data
+  # n: nr of attendance check over mean is calculated
+ 
+  gg_data1 &lt;- dat_attendace_roll_mean(x = x, n = n, from = from, to = to)
+  # first and last point
+  first &lt;- gg_data1 %&gt;% filter(!is.na(p_roll_mean)) %&gt;% filter(date == min(date))
+  last  &lt;- gg_data1 %&gt;% filter(!is.na(p_roll_mean)) %&gt;% filter(date == max(date))
+
+  
+  gg_data1 %&gt;% 
+    ggplot(aes(date, 1 - p_roll_mean)) + 
+    geom_line() +
+    geom_point(data = first, color = &quot;white&quot;, size = 2) + 
+    geom_point(data = last, color = &quot;white&quot;, size = 2) + 
+    hrbrthemes::theme_modern_rc(grid = &quot;Y&quot;, plot_title_size = 14,
+                            subtitle_size = 11, 
+                            plot_margin = ggplot2::margin(30, 30, 10, 30)) +
+    scale_y_continuous(labels = function(x) scales::percent(x, 1), 
+                       limits = c(.12, .22), 
+                       breaks = seq(.12, .24, .03)) +
+    labs(x = NULL, y = NULL, 
+         title = &quot;Absence from XIII Riigikogu sessions has increased&quot;,
+         subtitle = glue::glue(&quot;{n} meeting days rolling average absence&quot;),
+         caption = &quot;\nSource: https://aavik.riigikogu.ee/api/votings/ \n \nTheme: modern_rc from {hrbrthemes}&quot;) +
+    scale_color_manual(values = col_faction()) + 
+    theme(
+      legend.title = element_blank(),
+      text = element_text(family = &quot;Helvetica&quot;)
+    ) + 
+    geom_vline(xintercept = as.Date(c(&quot;2015-03-30&quot;, &quot;2016-11-23&quot;, &quot;2017-09-10&quot;)), 
+               lty = 2, alpha = .5, color = &quot;#8e8e93&quot;) + 
+    annotate(&quot;text&quot;, label = &quot;new goverment\ntook the oath&quot;, 
+                  x = as.Date(&quot;2016-11-23&quot;) - 20, y = .195, size = 3, hjust = 1) + 
+    annotate(&quot;text&quot;, label = &quot;end of 2017 \nsummer break&quot;, 
+                  x = as.Date(&quot;2017-09-10&quot;) + 20, y = .135, size = 3, hjust = 0) + 
+    annotate(&quot;text&quot;, label = &quot;2015-03-30 \nXIII Riigikogu \nfirst session&quot;, 
+                  x = as.Date(&quot;2015-03-30&quot;) + 20, y = .165, size = 3, hjust = 0) + 
+    annotate(&quot;text&quot;, label = scales::percent(1 - first$p_roll_mean),
+             x = first$date - 70, y = .134, size = 3.5, color = &quot;white&quot;) + 
+    annotate(&quot;text&quot;, label = scales::percent(1 - last$p_roll_mean),
+             x = last$date + 70, y = .215, size = 3.5, color = &quot;white&quot;) + 
+    scale_x_date(limits = as.Date(c(&quot;2015-01-01&quot;, &quot;2018-10-01&quot;)))
+     
+}  </code></pre>
+</div>
+<div id="results" class="section level1">
+<h1>Results</h1>
+<p>Reading forward, keep in mind that <strong>the attendance check information only shows who were present or absent at the moment of attendance check and not during the whole day of the sitting.</strong> In the following, member is considered absent, if (s)he has missed all attendance checks of the day.</p>
+<p><a href="https://en.wikipedia.org/wiki/Estonian_parliamentary_election,_2015">XIII Riigikogu</a> election was held in 1. March 2015. First XIII Riigikogu session took place in 30. March 2015. Six factions gained enough votes to get seats in Riigikogu. Following plot gives a glimpse of XIII Riigikogu sessions absence/attendance.</p>
+<p><code>plot_attendance_roll_mean(x = attendance, n = 90, from = &quot;2015-03-30&quot;)</code></p>
+<p><img src="/post/2018-08-15-estonian-parliament-session-attendance_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><strong>Notes: </strong></p>
+<ol style="list-style-type: decimal">
+<li>Member is considered absent for a day, if (s)he has missed all attendance checks of the day.<br />
+</li>
+<li>90 meeting days rolling average absence is calculated by summing all absences from those 90 days (e.g, day one - 15 members were absent, day two - 8 members were absent) divided by total votes (since Estonian parliament has 101 members, it would be 90 x 101).</li>
+<li>XIII Riigikogu 90th meeting day was <code>2016-01-21</code> which makes it the first day the 90 days rolling average is calculated. As of writing, last data point is from <code>2018-06-14</code>.<br />
+</li>
+<li><a href="https://en.wikipedia.org/wiki/J%C3%BCri_Ratas%27_cabinet"><code>2016-11-23</code> Jüri Ratas’ cabinet took the oath</a>. It was preceded by the Second Cabinet of Taavi Rõivas (from 9 April 2015 – 22 November 2016 <a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>), a cabinet that ended when Social Democrats and the Union of Pro Patria and Res Publica joined the opposition’s no confidence vote against the cabinet. <a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a></li>
+</ol>
+</div>
+<div id="fin" class="section level1">
+<h1>FIN</h1>
+<p>In this post we saw how to download Estonian parliament session attendance data using <a href="https://aavik.riigikogu.ee/">Government Office API</a>. One can use same methodology to get other votings data. There is obviously many (and more) interesting topics one can look into using data from the API. Since this post main focus was getting first feeling of the API and data, we leave further analysis for another posts.</p>
+<p>If you happen to use the API or have any question, please leave a comment. I am curious of your take on the data! :)</p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>As of writing this post the API is in demo/test phase.<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p><a href="https://en.wikipedia.org/wiki/Government_of_Estonia" class="uri">https://en.wikipedia.org/wiki/Government_of_Estonia</a><a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p><a href="https://en.wikipedia.org/wiki/J%C3%BCri_Ratas%27_cabinet">https://en.wikipedia.org/wiki/J%C3%BCri_Ratas%27_cabinet</a><a href="#fnref3">↩</a></p></li>
+</ol>
+</div>
+
+  </div>
+
+  <div id=links>
+    
+      <a class="basic-alignment left" href="/2018/04/extending-dt-child-row-example/">&laquo; Extending DT child rows example</a>
+    
+    
+  </div>
+</section>
+
+<section id="comments">
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+
+(function() {
+      
+      
+      if (window.location.hostname == "localhost")
+                return;
+
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      var disqus_shortname = 'reigo';
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+<div id="disqus_thread"></div>
+<script>
+
+
+
+
+
+(function() { 
+var d = document, s = d.createElement('script');
+s.src = 'https://reigo.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-113538088-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+  
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+
+</body>
+</html>
+

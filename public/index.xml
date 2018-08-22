@@ -6,10 +6,272 @@
     <description>Recent content on reigo.eu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 13 Apr 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 15 Aug 2018 00:00:00 +0000</lastBuildDate>
     
         <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Estonian Parliament Session Attendance</title>
+      <link>/2018/08/estonian-parliament-session-attendance/</link>
+      <pubDate>Wed, 15 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/08/estonian-parliament-session-attendance/</guid>
+      <description>&lt;p&gt;Description of the Parliament of Estonia from its &lt;a href=&#34;https://www.riigikogu.ee/en/&#34;&gt;website&lt;/a&gt;:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The Riigikogu is the parliament of Estonia. Its 101 members are elected at general elections for a term of four years. The Riigikogu passes laws and resolutions, exercises parliamentary supervision and ratifies international agreements.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Parliament of Estonia has regular meetings. In this post we look how to get session attendance data from &lt;a href=&#34;https://aavik.riigikogu.ee/&#34;&gt;Estonian Goverment Office API&lt;/a&gt;&lt;a href=&#34;#fn1&#34; class=&#34;footnoteRef&#34; id=&#34;fnref1&#34;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/a&gt; and visualize XIII Riigikogu absence from these sessions. &lt;a href=&#34;https://en.wikipedia.org/wiki/R_(programming_language)&#34;&gt;R&lt;/a&gt; will be used to get and analyze data.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Special thanks to Estonian Goverment Office eployees who answered my queries and showed me how to access the data I was interested in. Double thanks for reacting so quickly to fix a problem I was having!&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;If you are not interested getting into the R stuff, feel free to jump to &lt;a href=&#34;#results&#34;&gt;results&lt;/a&gt;.&lt;/p&gt;
+&lt;div id=&#34;data&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Data&lt;/h1&gt;
+&lt;p&gt;We use &lt;code&gt;jsonlite&lt;/code&gt; package to download parliament votings data. Required fields to access votings data are &lt;code&gt;startDate&lt;/code&gt; and &lt;code&gt;endDate&lt;/code&gt; (see &lt;a href=&#34;https://aavik.riigikogu.ee/swagger-ui.html#/H%C3%A4%C3%A4letused/getVotingsUsingGET&#34;&gt;/api/votings&lt;/a&gt;). Session attendance votings are marked as type &lt;code&gt;Kohaloleku kontroll&lt;/code&gt; (attendance control). Lets download all votings between &lt;code&gt;1990-01-01&lt;/code&gt; and &lt;code&gt;2018-09-01&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tidyverse)
+library(jsonlite)
+url &amp;lt;- &amp;quot;https://aavik.riigikogu.ee/api/votings?startDate=1990-01-01&amp;amp;endDate=2018-09-01&amp;amp;lang=et&amp;quot;
+votings &amp;lt;- fromJSON(url) %&amp;gt;% as_data_frame() 
+head(votings)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 6 x 5
+##   uuid           title             membership sittingDateTime  votings    
+##   &amp;lt;chr&amp;gt;          &amp;lt;chr&amp;gt;                  &amp;lt;int&amp;gt; &amp;lt;chr&amp;gt;            &amp;lt;list&amp;gt;     
+## 1 04be4e82-f266… Täiskogu korrali…          8 1998-01-22T00:0… &amp;lt;data.fram…
+## 2 6176a8ae-89ac… Täiskogu korrali…          8 1998-01-29T00:0… &amp;lt;data.fram…
+## 3 bcb34b03-a842… Täiskogu korrali…          8 1998-02-09T00:0… &amp;lt;data.fram…
+## 4 cd42db50-d8b7… Täiskogu korrali…          8 1998-02-11T00:0… &amp;lt;data.fram…
+## 5 e289a577-8c64… Täiskogu korrali…          8 1998-02-18T00:0… &amp;lt;data.fram…
+## 6 1ea1246f-056f… Täiskogu korrali…          8 1998-02-25T00:0… &amp;lt;data.fram…&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Voting type information lies in &lt;code&gt;votings&lt;/code&gt; list-column. Using &lt;code&gt;str()&lt;/code&gt; we see that votings &lt;code&gt;data.frame&lt;/code&gt; also as some list-columns. Since these list-columns are not necessary for us, lets remove them to have nice &lt;code&gt;data.frame&lt;/code&gt; structure.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;str(votings$votings[[1]])&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## &amp;#39;data.frame&amp;#39;:    1 obs. of  15 variables:
+##  $ uuid           : chr &amp;quot;c80bec7e-58cb-347e-ba2b-6511cf1b9b8d&amp;quot;
+##  $ votingNumber   : int 1
+##  $ type           :&amp;#39;data.frame&amp;#39;: 1 obs. of  2 variables:
+##   ..$ code : chr &amp;quot;AVALIK&amp;quot;
+##   ..$ value: chr &amp;quot;Avalik&amp;quot;
+##  $ description    : logi NA
+##  $ startDateTime  : chr &amp;quot;1998-01-22T10:42:00&amp;quot;
+##  $ endDateTime    : logi NA
+##  $ present        : int 75
+##  $ absent         : int 26
+##  $ inFavor        : int 66
+##  $ against        : int 3
+##  $ neutral        : int 6
+##  $ abstained      : int 26
+##  $ relatedDraft   : logi NA
+##  $ relatedDocument: logi NA
+##  $ _links         :&amp;#39;data.frame&amp;#39;: 1 obs. of  1 variable:
+##   ..$ self:&amp;#39;data.frame&amp;#39;: 1 obs. of  1 variable:
+##   .. ..$ href: chr &amp;quot;http://aavik.riigikogu.ee/api/votings/c80bec7e-58cb-347e-ba2b-6511cf1b9b8d&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;votings &amp;lt;- votings %&amp;gt;%
+  mutate(votings = map(votings, function(x) {
+    x[, map_chr(x, typeof) != &amp;quot;list&amp;quot;]
+  })) %&amp;gt;%
+  unnest(votings)
+head(votings)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 6 x 17
+##   uuid  title membership sittingDateTime uuid1 votingNumber description
+##   &amp;lt;chr&amp;gt; &amp;lt;chr&amp;gt;      &amp;lt;int&amp;gt; &amp;lt;chr&amp;gt;           &amp;lt;chr&amp;gt;        &amp;lt;int&amp;gt; &amp;lt;chr&amp;gt;      
+## 1 04be… Täis…          8 1998-01-22T00:… c80b…            1 &amp;lt;NA&amp;gt;       
+## 2 6176… Täis…          8 1998-01-29T00:… 43cc…            3 1. parandus
+## 3 6176… Täis…          8 1998-01-29T00:… 2b57…            2 660        
+## 4 6176… Täis…          8 1998-01-29T00:… d729…            4 2. parandus
+## 5 6176… Täis…          8 1998-01-29T00:… fb1e…            1 1. parandus
+## 6 bcb3… Täis…          8 1998-02-09T00:… 2136…            1 Päevakorra…
+## # ... with 10 more variables: startDateTime &amp;lt;chr&amp;gt;, endDateTime &amp;lt;chr&amp;gt;,
+## #   present &amp;lt;int&amp;gt;, absent &amp;lt;int&amp;gt;, inFavor &amp;lt;int&amp;gt;, against &amp;lt;int&amp;gt;,
+## #   neutral &amp;lt;int&amp;gt;, abstained &amp;lt;int&amp;gt;, relatedDraft &amp;lt;lgl&amp;gt;,
+## #   relatedDocument &amp;lt;lgl&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Voting type information is in column &lt;code&gt;description&lt;/code&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;votings %&amp;gt;% 
+  count(description) %&amp;gt;% 
+  arrange(-n) %&amp;gt;% 
+  head()&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 6 x 2
+##   description                   n
+##   &amp;lt;chr&amp;gt;                     &amp;lt;int&amp;gt;
+## 1 Lõpphääletus               3245
+## 2 Kohaloleku kontroll        3150
+## 3 Päevakorra kinnitamine      573
+## 4 Lükata tagasi               427
+## 5 Läbirääkimiste lôpetamine   376
+## 6 1. parandus                 355&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;For getting detailed votings information we use &lt;code&gt;get_votings()&lt;/code&gt; function. In process of getting detailed votings information we also save all votings data so that we can easily use it later.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;get_voting &amp;lt;- function(uuid = NULL) {
+  
+  # uuid: voting id
+  # one voting is saved once
+  # expects to have data/voting-details folder in your working directory
+  
+  files &amp;lt;- dir(&amp;quot;data/voting-details/&amp;quot;) # detailed votings local directory
+  if (paste0(uuid, &amp;quot;.rds&amp;quot;) %in% files) 
+    y &amp;lt;- readRDS(paste0(&amp;quot;data/voting-details/&amp;quot;, uuid, &amp;quot;.rds&amp;quot;))
+  else {
+    url &amp;lt;- glue::glue(&amp;quot;https://aavik.riigikogu.ee/api/votings/{uuid}?lang=et&amp;quot;)
+    Sys.sleep(5) + runif(1, max = 2)
+    y &amp;lt;- tryCatch({
+      x &amp;lt;- jsonlite::fromJSON(url)
+      x
+    }, error = function(y) NULL)
+    if (!is.null(y)) saveRDS(y, paste0(&amp;quot;data/voting-details/&amp;quot;, uuid, &amp;quot;.rds&amp;quot;))
+    else print(y) 
+  }
+  y
+}
+
+ids &amp;lt;- votings$uuid1[votings$description == &amp;quot;Kohaloleku kontroll&amp;quot;]
+map(ids, get_voting)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After getting and saving all necessary attendance check data, we use &lt;code&gt;var_faction()&lt;/code&gt; and &lt;code&gt;var_decision()&lt;/code&gt; functions and some mutating to make &lt;code&gt;attendance&lt;/code&gt; data more accessible:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;var_faction &amp;lt;- function(x) {
+  faction &amp;lt;- x$faction$name
+  x$faction &amp;lt;- faction
+  x
+}
+
+var_decision &amp;lt;- function(x) {
+  decision &amp;lt;- x$decision$value
+  x$decision &amp;lt;- decision
+  x
+}
+
+files &amp;lt;- dir(&amp;quot;data/voting-details/&amp;quot;, full.names = T)
+attendance &amp;lt;- map_df(files, function(f) {
+  x &amp;lt;- readRDS(f)
+  x$voters %&amp;gt;% select(-`_links`, -lastName, -firstName) %&amp;gt;%
+    var_faction() %&amp;gt;%
+    var_decision() %&amp;gt;% as_data_frame() %&amp;gt;%
+    mutate(
+      votingNumber = x$votingNumber,
+      startDatetime = lubridate::as_datetime(x$startDateTime)
+    )
+}) %&amp;gt;%
+  left_join(votings %&amp;gt;% select(uuid = uuid1, description), by = &amp;quot;uuid&amp;quot;) %&amp;gt;%
+  filter(description == &amp;quot;Kohaloleku kontroll&amp;quot;)
+
+head(attendance)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 6 x 6
+##   fullName   active faction      decision votingNumber startDatetime      
+##   &amp;lt;chr&amp;gt;      &amp;lt;lgl&amp;gt;  &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;           &amp;lt;int&amp;gt; &amp;lt;dttm&amp;gt;             
+## 1 Rein Aidma FALSE  Eesti Refor… kohal            6518 2007-05-16 14:05:51
+## 2 Jaak Aab   FALSE  &amp;lt;NA&amp;gt;         kohal            6518 2007-05-16 14:05:51
+## 3 Peep Aru   TRUE   Eesti Refor… kohal            6518 2007-05-16 14:05:51
+## 4 Hannes As… FALSE  &amp;lt;NA&amp;gt;         kohal            6518 2007-05-16 14:05:51
+## 5 Meelis At… FALSE  &amp;lt;NA&amp;gt;         kohal            6518 2007-05-16 14:05:51
+## 6 Ivi Eenmaa FALSE  &amp;lt;NA&amp;gt;         kohal            6518 2007-05-16 14:05:51&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;By now we have all necessary data. Decision values &lt;code&gt;kohal&lt;/code&gt; and &lt;code&gt;poolt&lt;/code&gt; mean that parliament member attended meeting. &lt;code&gt;puudub&lt;/code&gt; means that member did not attend the meeting.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;helpers&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Helpers&lt;/h1&gt;
+&lt;p&gt;We use following helper functions to make data munging and plotting easier:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dat_attendace_roll_mean &amp;lt;- function(x = NULL, n = 1, from = &amp;quot;1970-01-01&amp;quot;, 
+                                    to = Sys.Date()) {
+  
+  # member has to be present (attend) at least in 1 attendence check to be 
+  # counted as present for the day
+  # 
+  # x: attendance data
+  # n: nr of attendance check over mean is calculated
+  
+  from &amp;lt;- as.Date(from)
+  to &amp;lt;- as.Date(to)
+  
+  x %&amp;gt;% 
+    mutate(date = lubridate::date(startDatetime)) %&amp;gt;% 
+    filter(date &amp;gt;= from &amp;amp; date &amp;lt;= to) %&amp;gt;%
+    count(date, fullName, decision) %&amp;gt;%
+    group_by(date) %&amp;gt;%
+    summarise(
+      n_present = sum(decision %in% c(&amp;quot;kohal&amp;quot;, &amp;quot;poolt&amp;quot;)),
+      n_total = n_distinct(fullName)
+    ) %&amp;gt;% ungroup() %&amp;gt;% 
+    mutate(p_present = n_present / n_total) %&amp;gt;% 
+    mutate(
+      p_roll_mean = RcppRoll::roll_sumr(n_present, n = n, na.rm = T) / 
+        RcppRoll::roll_sumr(n_total, n = n, na.rm = T)
+    ) %&amp;gt;% ungroup() 
+}
+
+plot_attendance_roll_mean &amp;lt;- function(x = NULL, n = 1, from = &amp;quot;1970-01-01&amp;quot;, 
+                                      to = Sys.Date()) {
+  
+  # plotting function for making results part easier to read
+  # 
+  # x: attendance data
+  # n: nr of attendance check over mean is calculated
+ 
+  gg_data1 &amp;lt;- dat_attendace_roll_mean(x = x, n = n, from = from, to = to)
+  # first and last point
+  first &amp;lt;- gg_data1 %&amp;gt;% filter(!is.na(p_roll_mean)) %&amp;gt;% filter(date == min(date))
+  last  &amp;lt;- gg_data1 %&amp;gt;% filter(!is.na(p_roll_mean)) %&amp;gt;% filter(date == max(date))
+
+  
+  gg_data1 %&amp;gt;% 
+    ggplot(aes(date, 1 - p_roll_mean)) + 
+    geom_line() +
+    geom_point(data = first, color = &amp;quot;white&amp;quot;, size = 2) + 
+    geom_point(data = last, color = &amp;quot;white&amp;quot;, size = 2) + 
+    hrbrthemes::theme_modern_rc(grid = &amp;quot;Y&amp;quot;, plot_title_size = 14,
+                            subtitle_size = 11, 
+                            plot_margin = ggplot2::margin(30, 30, 10, 30)) +
+    scale_y_continuous(labels = function(x) scales::percent(x, 1), 
+                       limits = c(.12, .22), 
+                       breaks = seq(.12, .24, .03)) +
+    labs(x = NULL, y = NULL, 
+         title = &amp;quot;Absence from XIII Riigikogu sessions has increased&amp;quot;,
+         subtitle = glue::glue(&amp;quot;{n} meeting days rolling average absence&amp;quot;),
+         caption = &amp;quot;\nSource: https://aavik.riigikogu.ee/api/votings/ \n \nTheme: modern_rc from {hrbrthemes}&amp;quot;) +
+    scale_color_manual(values = col_faction()) + 
+    theme(
+      legend.title = element_blank(),
+      text = element_text(family = &amp;quot;Helvetica&amp;quot;)
+    ) + 
+    geom_vline(xintercept = as.Date(c(&amp;quot;2015-03-30&amp;quot;, &amp;quot;2016-11-23&amp;quot;, &amp;quot;2017-09-10&amp;quot;)), 
+               lty = 2, alpha = .5, color = &amp;quot;#8e8e93&amp;quot;) + 
+    annotate(&amp;quot;text&amp;quot;, label = &amp;quot;new goverment\ntook the oath&amp;quot;, 
+                  x = as.Date(&amp;quot;2016-11-23&amp;quot;) - 20, y = .195, size = 3, hjust = 1) + 
+    annotate(&amp;quot;text&amp;quot;, label = &amp;quot;end of 2017 \nsummer break&amp;quot;, 
+                  x = as.Date(&amp;quot;2017-09-10&amp;quot;) + 20, y = .135, size = 3, hjust = 0) + 
+    annotate(&amp;quot;text&amp;quot;, label = &amp;quot;2015-03-30 \nXIII Riigikogu \nfirst session&amp;quot;, 
+                  x = as.Date(&amp;quot;2015-03-30&amp;quot;) + 20, y = .165, size = 3, hjust = 0) + 
+    annotate(&amp;quot;text&amp;quot;, label = scales::percent(1 - first$p_roll_mean),
+             x = first$date - 70, y = .134, size = 3.5, color = &amp;quot;white&amp;quot;) + 
+    annotate(&amp;quot;text&amp;quot;, label = scales::percent(1 - last$p_roll_mean),
+             x = last$date + 70, y = .215, size = 3.5, color = &amp;quot;white&amp;quot;) + 
+    scale_x_date(limits = as.Date(c(&amp;quot;2015-01-01&amp;quot;, &amp;quot;2018-10-01&amp;quot;)))
+     
+}  &lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;results&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Results&lt;/h1&gt;
+&lt;p&gt;Reading forward, keep in mind that &lt;strong&gt;the attendance check information only shows who were present or absent at the moment of attendance check and not during the whole day of the sitting.&lt;/strong&gt; In the following, member is considered absent, if (s)he has missed all attendance checks of the day.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/Estonian_parliamentary_election,_2015&#34;&gt;XIII Riigikogu&lt;/a&gt; election was held in 1. March 2015. First XIII Riigikogu session took place in 30. March 2015. Six factions gained enough votes to get seats in Riigikogu. Following plot gives a glimpse of XIII Riigikogu sessions absence/attendance.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;plot_attendance_roll_mean(x = attendance, n = 90, from = &amp;quot;2015-03-30&amp;quot;)&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-08-15-estonian-parliament-session-attendance_files/figure-html/unnamed-chunk-10-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Notes: &lt;/strong&gt;&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;Member is considered absent for a day, if (s)he has missed all attendance checks of the day.&lt;br /&gt;
+&lt;/li&gt;
+&lt;li&gt;90 meeting days rolling average absence is calculated by summing all absences from those 90 days (e.g, day one - 15 members were absent, day two - 8 members were absent) divided by total votes (since Estonian parliament has 101 members, it would be 90 x 101).&lt;/li&gt;
+&lt;li&gt;XIII Riigikogu 90th meeting day was &lt;code&gt;2016-01-21&lt;/code&gt; which makes it the first day the 90 days rolling average is calculated. As of writing, last data point is from &lt;code&gt;2018-06-14&lt;/code&gt;.&lt;br /&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/J%C3%BCri_Ratas%27_cabinet&#34;&gt;&lt;code&gt;2016-11-23&lt;/code&gt; Jüri Ratas’ cabinet took the oath&lt;/a&gt;. It was preceded by the Second Cabinet of Taavi Rõivas (from 9 April 2015 – 22 November 2016 &lt;a href=&#34;#fn2&#34; class=&#34;footnoteRef&#34; id=&#34;fnref2&#34;&gt;&lt;sup&gt;2&lt;/sup&gt;&lt;/a&gt;), a cabinet that ended when Social Democrats and the Union of Pro Patria and Res Publica joined the opposition’s no confidence vote against the cabinet. &lt;a href=&#34;#fn3&#34; class=&#34;footnoteRef&#34; id=&#34;fnref3&#34;&gt;&lt;sup&gt;3&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div id=&#34;fin&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;FIN&lt;/h1&gt;
+&lt;p&gt;In this post we saw how to download Estonian parliament session attendance data using &lt;a href=&#34;https://aavik.riigikogu.ee/&#34;&gt;Government Office API&lt;/a&gt;. One can use same methodology to get other votings data. There is obviously many (and more) interesting topics one can look into using data from the API. Since this post main focus was getting first feeling of the API and data, we leave further analysis for another posts.&lt;/p&gt;
+&lt;p&gt;If you happen to use the API or have any question, please leave a comment. I am curious of your take on the data! :)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+&lt;hr /&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn1&#34;&gt;&lt;p&gt;As of writing this post the API is in demo/test phase.&lt;a href=&#34;#fnref1&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn2&#34;&gt;&lt;p&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/Government_of_Estonia&#34; class=&#34;uri&#34;&gt;https://en.wikipedia.org/wiki/Government_of_Estonia&lt;/a&gt;&lt;a href=&#34;#fnref2&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn3&#34;&gt;&lt;p&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/J%C3%BCri_Ratas%27_cabinet&#34;&gt;https://en.wikipedia.org/wiki/J%C3%BCri_Ratas%27_cabinet&lt;/a&gt;&lt;a href=&#34;#fnref3&#34;&gt;↩&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
+    </item>
     
     <item>
       <title>Extending DT child rows example</title>
