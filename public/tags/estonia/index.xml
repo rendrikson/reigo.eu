@@ -21,8 +21,8 @@
 &lt;blockquote&gt;
 &lt;p&gt;The Riigikogu is the parliament of Estonia. Its 101 members are elected at general elections for a term of four years. The Riigikogu passes laws and resolutions, exercises parliamentary supervision and ratifies international agreements.&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;Parliament of Estonia has regular meetings. In this post we look how to get session attendance data from &lt;a href=&#34;https://aavik.riigikogu.ee/&#34;&gt;Estonian Goverment Office API&lt;/a&gt;&lt;a href=&#34;#fn1&#34; class=&#34;footnoteRef&#34; id=&#34;fnref1&#34;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/a&gt; and visualize XIII Riigikogu absence from these sessions. &lt;a href=&#34;https://en.wikipedia.org/wiki/R_(programming_language)&#34;&gt;R&lt;/a&gt; will be used to get and analyze data.&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;Special thanks to Estonian Goverment Office eployees who answered my queries and showed me how to access the data I was interested in. Double thanks for reacting so quickly to fix a problem I was having!&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Parliament of Estonia has regular meetings. In this post we look how to get session attendance data from &lt;a href=&#34;https://aavik.riigikogu.ee/&#34;&gt;Estonian Government Office API&lt;/a&gt;&lt;a href=&#34;#fn1&#34; class=&#34;footnoteRef&#34; id=&#34;fnref1&#34;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/a&gt; and visualize XIII Riigikogu absence from these sessions. &lt;a href=&#34;https://en.wikipedia.org/wiki/R_(programming_language)&#34;&gt;R&lt;/a&gt; will be used to get and analyze data.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Special thanks to Estonian Government Office eployees who answered my queries and showed me how to access the data I was interested in. Double thanks for reacting so quickly to fix a problem I was having!&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;If you are not interested getting into the R stuff, feel free to jump to &lt;a href=&#34;#results&#34;&gt;results&lt;/a&gt;.&lt;/p&gt;
 &lt;div id=&#34;data&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Data&lt;/h1&gt;
@@ -227,7 +227,7 @@ plot_attendance_roll_mean &amp;lt;- function(x = NULL, n = 1, from = &amp;quot;1
     ) + 
     geom_vline(xintercept = as.Date(c(&amp;quot;2015-03-30&amp;quot;, &amp;quot;2016-11-23&amp;quot;, &amp;quot;2017-09-10&amp;quot;)), 
                lty = 2, alpha = .5, color = &amp;quot;#8e8e93&amp;quot;) + 
-    annotate(&amp;quot;text&amp;quot;, label = &amp;quot;new goverment\ntook the oath&amp;quot;, 
+    annotate(&amp;quot;text&amp;quot;, label = &amp;quot;new government\ntook the oath&amp;quot;, 
                   x = as.Date(&amp;quot;2016-11-23&amp;quot;) - 20, y = .195, size = 3, hjust = 1) + 
     annotate(&amp;quot;text&amp;quot;, label = &amp;quot;end of 2017 \nsummer break&amp;quot;, 
                   x = as.Date(&amp;quot;2017-09-10&amp;quot;) + 20, y = .135, size = 3, hjust = 0) + 

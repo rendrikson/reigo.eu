@@ -15,8 +15,8 @@ tags:
 <blockquote>
 <p>The Riigikogu is the parliament of Estonia. Its 101 members are elected at general elections for a term of four years. The Riigikogu passes laws and resolutions, exercises parliamentary supervision and ratifies international agreements.</p>
 </blockquote>
-<p>Parliament of Estonia has regular meetings. In this post we look how to get session attendance data from <a href="https://aavik.riigikogu.ee/">Estonian Goverment Office API</a><a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> and visualize XIII Riigikogu absence from these sessions. <a href="https://en.wikipedia.org/wiki/R_(programming_language)">R</a> will be used to get and analyze data.</p>
-<p><em>Special thanks to Estonian Goverment Office eployees who answered my queries and showed me how to access the data I was interested in. Double thanks for reacting so quickly to fix a problem I was having!</em></p>
+<p>Parliament of Estonia has regular meetings. In this post we look how to get session attendance data from <a href="https://aavik.riigikogu.ee/">Estonian Government Office API</a><a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> and visualize XIII Riigikogu absence from these sessions. <a href="https://en.wikipedia.org/wiki/R_(programming_language)">R</a> will be used to get and analyze data.</p>
+<p><em>Special thanks to Estonian Government Office eployees who answered my queries and showed me how to access the data I was interested in. Double thanks for reacting so quickly to fix a problem I was having!</em></p>
 <p>If you are not interested getting into the R stuff, feel free to jump to <a href="#results">results</a>.</p>
 <div id="data" class="section level1">
 <h1>Data</h1>
@@ -221,7 +221,7 @@ plot_attendance_roll_mean &lt;- function(x = NULL, n = 1, from = &quot;1970-01-0
     ) + 
     geom_vline(xintercept = as.Date(c(&quot;2015-03-30&quot;, &quot;2016-11-23&quot;, &quot;2017-09-10&quot;)), 
                lty = 2, alpha = .5, color = &quot;#8e8e93&quot;) + 
-    annotate(&quot;text&quot;, label = &quot;new goverment\ntook the oath&quot;, 
+    annotate(&quot;text&quot;, label = &quot;new government\ntook the oath&quot;, 
                   x = as.Date(&quot;2016-11-23&quot;) - 20, y = .195, size = 3, hjust = 1) + 
     annotate(&quot;text&quot;, label = &quot;end of 2017 \nsummer break&quot;, 
                   x = as.Date(&quot;2017-09-10&quot;) + 20, y = .135, size = 3, hjust = 0) + 
